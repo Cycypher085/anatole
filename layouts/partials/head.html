@@ -174,6 +174,54 @@
     ></script>
   {{ end }}
 
+  {{ if and hugo.IsMultilingual (not .Site.Params.disableLanguageSwitcher) }}
+    {{ $anatoleLanguageSwitcher := resources.Get "js/anatole-language-switcher.js" }}
+    <script type="text/javascript">
+      {{ $anatoleLanguageSwitcher.Content | safeJS }}
+    </script>
+  {{ end }}
+
+  <!-- 动态背景功能 -->
+  {{ if not .Site.Params.disableDynamicBackground }}
+    {{ $dynamicBackgroundCSS := resources.Get "css/dynamic-background.css" }}
+    {{ $secureDynamicBackgroundCSS := $dynamicBackgroundCSS | resources.Minify | resources.Fingerprint }}
+    <link
+      rel="stylesheet"
+      href="{{ $secureDynamicBackgroundCSS.RelPermalink }}"
+      integrity="{{ $secureDynamicBackgroundCSS.Data.Integrity }}"
+      crossorigin="anonymous"
+      type="text/css"
+    />
+
+    {{ $dynamicBackgroundEnhanceCSS := resources.Get "css/dynamic-background-enhance.css" }}
+    {{ $secureDynamicBackgroundEnhanceCSS := $dynamicBackgroundEnhanceCSS | resources.Minify | resources.Fingerprint }}
+    <link
+      rel="stylesheet"
+      href="{{ $secureDynamicBackgroundEnhanceCSS.RelPermalink }}"
+      integrity="{{ $secureDynamicBackgroundEnhanceCSS.Data.Integrity }}"
+      crossorigin="anonymous"
+      type="text/css"
+    />
+
+    {{ $dynamicBackgroundJS := resources.Get "js/dynamic-background.js" }}
+    {{ $secureDynamicBackgroundJS := $dynamicBackgroundJS | resources.Minify | resources.Fingerprint }}
+    <script
+      type="text/javascript"
+      src="{{ $secureDynamicBackgroundJS.RelPermalink }}"
+      integrity="{{ $secureDynamicBackgroundJS.Data.Integrity }}"
+      crossorigin="anonymous"
+    ></script>
+
+    {{ $dynamicBackgroundFixJS := resources.Get "js/dynamic-background-fix.js" }}
+    {{ $secureDynamicBackgroundFixJS := $dynamicBackgroundFixJS | resources.Minify | resources.Fingerprint }}
+    <script
+      type="text/javascript"
+      src="{{ $secureDynamicBackgroundFixJS.RelPermalink }}"
+      integrity="{{ $secureDynamicBackgroundFixJS.Data.Integrity }}"
+      crossorigin="anonymous"
+    ></script>
+  {{ end }}
+
   {{- $js := "" -}}
   {{- range .Site.Params.customJs -}}
     {{- if or (in . "http://") (in . "https://") -}}

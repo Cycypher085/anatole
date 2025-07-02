@@ -1,0 +1,200 @@
+/* 动态背景增强样式 - 专门优化MD文件页面 */
+
+/* 确保动态背景在所有页面类型中都能正常工作 */
+:root.dynamic-bg-enabled {
+  /* MD页面专用变量 */
+  --md-bg-opacity-light: 0.92;
+  --md-bg-opacity-dark: 0.88;
+  --md-content-blur: 8px;
+}
+
+/* 针对MD文件页面的特殊优化 */
+:root.dynamic-bg-enabled .post {
+  /* 确保文章容器有足够的对比度 */
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+/* 白天模式MD页面优化 */
+:root.dynamic-bg-enabled .theme--light .post {
+  background-color: rgba(255, 255, 255, var(--md-bg-opacity-light)) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:root.dynamic-bg-enabled .theme--light .post__content {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(var(--md-content-blur));
+  -webkit-backdrop-filter: blur(var(--md-content-blur));
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+/* 夜晚模式MD页面优化 */
+:root.dynamic-bg-enabled .theme--dark .post {
+  background-color: rgba(21, 32, 40, var(--md-bg-opacity-dark)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content {
+  background-color: rgba(21, 32, 40, 0.92) !important;
+  backdrop-filter: blur(var(--md-content-blur));
+  -webkit-backdrop-filter: blur(var(--md-content-blur));
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+/* MD内容元素的优化 */
+:root.dynamic-bg-enabled .post__content h1,
+:root.dynamic-bg-enabled .post__content h2,
+:root.dynamic-bg-enabled .post__content h3,
+:root.dynamic-bg-enabled .post__content h4,
+:root.dynamic-bg-enabled .post__content h5,
+:root.dynamic-bg-enabled .post__content h6 {
+  position: relative;
+  z-index: 1;
+}
+
+/* 代码块的特殊处理 */
+:root.dynamic-bg-enabled .theme--light .post__content pre,
+:root.dynamic-bg-enabled .theme--light .post__content code {
+  background-color: rgba(248, 248, 248, 0.95) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content pre,
+:root.dynamic-bg-enabled .theme--dark .post__content code {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 引用块的优化 */
+:root.dynamic-bg-enabled .theme--light .post__content blockquote {
+  background-color: rgba(240, 240, 240, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-left: 4px solid rgba(0, 123, 255, 0.6);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content blockquote {
+  background-color: rgba(50, 50, 50, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-left: 4px solid rgba(100, 170, 255, 0.6);
+}
+
+/* 表格的优化 */
+:root.dynamic-bg-enabled .theme--light .post__content table {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content table {
+  background-color: rgba(21, 32, 40, 0.9) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* 链接的视觉增强 */
+:root.dynamic-bg-enabled .post__content a {
+  position: relative;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+:root.dynamic-bg-enabled .theme--light .post__content a {
+  color: #0066cc;
+  border-bottom-color: rgba(0, 102, 204, 0.3);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content a {
+  color: #66b3ff;
+  border-bottom-color: rgba(102, 179, 255, 0.3);
+}
+
+:root.dynamic-bg-enabled .post__content a:hover {
+  border-bottom-color: currentColor;
+  transform: translateY(-1px);
+}
+
+/* 元信息区域的优化 */
+:root.dynamic-bg-enabled .theme--light .post__meta {
+  background-color: rgba(245, 245, 245, 0.85) !important;
+  backdrop-filter: blur(6px);
+  border-radius: 6px;
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__meta {
+  background-color: rgba(35, 45, 55, 0.85) !important;
+  backdrop-filter: blur(6px);
+  border-radius: 6px;
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0;
+}
+
+/* 页脚区域的优化 */
+:root.dynamic-bg-enabled .theme--light .post__footer {
+  background-color: rgba(250, 250, 250, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__footer {
+  background-color: rgba(25, 35, 45, 0.8) !important;
+  backdrop-filter: blur(4px);
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  :root.dynamic-bg-enabled .post__content {
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  :root.dynamic-bg-enabled .post__meta {
+    padding: 0.6rem 1rem !important;
+  }
+}
+
+/* 高对比度模式的处理 */
+@media (prefers-contrast: high) {
+  :root.dynamic-bg-enabled .theme--light .post,
+  :root.dynamic-bg-enabled .theme--light .post__content {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .post,
+  :root.dynamic-bg-enabled .theme--dark .post__content {
+    background-color: rgba(21, 32, 40, 0.98) !important;
+  }
+}
+
+/* 减少动画偏好的处理 */
+@media (prefers-reduced-motion: reduce) {
+  :root.dynamic-bg-enabled .post,
+  :root.dynamic-bg-enabled .post__content,
+  :root.dynamic-bg-enabled .post__content a {
+    transition: none !important;
+  }
+}
+
+/* 打印模式的处理 */
+@media print {
+  :root.dynamic-bg-enabled .post,
+  :root.dynamic-bg-enabled .post__content {
+    background-color: white !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+} 

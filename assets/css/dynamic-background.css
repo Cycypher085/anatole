@@ -1,0 +1,470 @@
+/* 动态背景系统 - 使用CSS变量控制，完全不影响原有布局 */
+
+/* 当启用动态背景时，设置CSS变量来控制背景 */
+:root.dynamic-bg-enabled {
+  --dynamic-bg-enabled: 1;
+}
+
+/* 默认状态，不启用动态背景 */
+:root {
+  --dynamic-bg-enabled: 0;
+}
+
+/* 动态背景容器 - 仅在启用时显示 */
+.dynamic-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1000; /* 确保在最底层 */
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0; /* 默认隐藏 */
+  transition: opacity 0.5s ease;
+}
+
+/* 仅当启用时显示动态背景 */
+:root.dynamic-bg-enabled .dynamic-background {
+  opacity: 1;
+}
+
+/* 白天模式动态背景 */
+.theme--light .dynamic-background {
+  background: linear-gradient(-45deg, 
+    rgba(238, 119, 82, 0.08),
+    rgba(231, 60, 126, 0.08), 
+    rgba(35, 166, 213, 0.08), 
+    rgba(35, 213, 171, 0.08));
+  background-size: 400% 400%;
+  animation: lightGradient 20s ease infinite;
+}
+
+.theme--light .dynamic-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(238, 119, 82, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(35, 166, 213, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(35, 213, 171, 0.05) 0%, transparent 40%);
+  animation: lightPulse 15s ease-in-out infinite alternate;
+}
+
+/* 夜晚模式动态背景 */
+.theme--dark .dynamic-background {
+  background: 
+    radial-gradient(ellipse at top, rgba(12, 12, 12, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse at bottom, rgba(44, 24, 16, 0.12) 0%, transparent 70%);
+  animation: darkGradient 30s ease infinite;
+}
+
+.theme--dark .dynamic-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20% 10%, rgba(255,255,255,0.15), transparent),
+    radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.12), transparent),
+    radial-gradient(0.8px 0.8px at 80% 60%, rgba(255,255,255,0.18), transparent),
+    radial-gradient(0.8px 0.8px at 30% 80%, rgba(255,255,255,0.10), transparent),
+    radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.14), transparent);
+  background-repeat: repeat;
+  background-size: 250px 150px;
+  animation: sparkle 25s linear infinite, darkPulse 10s ease-in-out infinite alternate;
+}
+
+.theme--dark .dynamic-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(0.6px 0.6px at 40% 40%, rgba(255,255,255,0.08), transparent),
+    radial-gradient(0.6px 0.6px at 70% 20%, rgba(255,255,255,0.06), transparent),
+    radial-gradient(0.4px 0.4px at 10% 70%, rgba(255,255,255,0.12), transparent);
+  background-repeat: repeat;
+  background-size: 300px 200px;
+  animation: twinkle 20s linear infinite reverse;
+}
+
+/* 动画定义 */
+@keyframes lightGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes lightPulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+@keyframes darkGradient {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.02); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes sparkle {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(-250px) translateY(-150px); }
+}
+
+@keyframes darkPulse {
+  0% { opacity: 0.9; }
+  100% { opacity: 1; }
+}
+
+@keyframes twinkle {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-100px) scale(1.1); }
+  100% { transform: translateY(-200px) scale(1); }
+}
+
+/* 当启用动态背景时，让部分背景变为半透明以显示效果 */
+:root.dynamic-bg-enabled .theme--light .body {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .body {
+  background-color: rgba(21, 32, 40, 0.85) !important;
+}
+
+/* 原有header定义已移至文件末尾以避免重复 */
+
+:root.dynamic-bg-enabled .theme--light .post {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post {
+  background-color: rgba(21, 32, 40, 0.88) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 导航栏动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .nav__list {
+  background-color: rgba(238, 238, 238, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .nav__list {
+  background-color: rgba(70, 70, 70, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* 桌面端导航栏 */
+@media screen and (min-width: 961px) {
+  :root.dynamic-bg-enabled .theme--light .nav__list {
+    background-color: rgba(255, 255, 255, 0.92) !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .nav__list {
+    background-color: rgba(21, 32, 40, 0.92) !important;
+  }
+}
+
+/* 选项切换器动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .optionswitch__list {
+  background: rgba(238, 238, 238, 0.9) !important;
+  backdrop-filter: blur(12px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .optionswitch__list {
+  background: rgba(70, 70, 70, 0.9) !important;
+  backdrop-filter: blur(12px);
+}
+
+:root.dynamic-bg-enabled .theme--light .optionswitch__triangle::before {
+  background: rgba(238, 238, 238, 0.9) !important;
+  border-color: rgba(238, 238, 238, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .optionswitch__triangle::before {
+  background: rgba(70, 70, 70, 0.9) !important;
+  border-color: rgba(70, 70, 70, 0.9) !important;
+}
+
+/* 作品集组件动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .portfolio__image-wrapper--left,
+:root.dynamic-bg-enabled .theme--light .portfolio__image-wrapper--right {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .portfolio__image-wrapper--left,
+:root.dynamic-bg-enabled .theme--dark .portfolio__image-wrapper--right {
+  background-color: rgba(21, 32, 40, 0.95) !important;
+}
+
+:root.dynamic-bg-enabled .theme--light .portfolio__description {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .portfolio__description {
+  background-color: rgba(21, 32, 40, 0.95) !important;
+}
+
+/* 代码块动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .post__content pre,
+:root.dynamic-bg-enabled .theme--light .post__content .chroma {
+  background-color: rgba(238, 238, 238, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content pre,
+:root.dynamic-bg-enabled .theme--dark .post__content .chroma {
+  background-color: rgba(70, 70, 70, 0.9) !important;
+}
+
+/* 侧边栏增强（虽然没有明显背景，但添加微妙效果） */
+:root.dynamic-bg-enabled .sidebar {
+  backdrop-filter: blur(2px);
+}
+
+@media screen and (min-width: 961px) {
+  :root.dynamic-bg-enabled .theme--light .sidebar {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .sidebar {
+    background: linear-gradient(135deg, rgba(21, 32, 40, 0.1) 0%, rgba(21, 32, 40, 0.05) 100%);
+  }
+}
+
+/* 评论区域动态背景支持 */
+:root.dynamic-bg-enabled .comment {
+  backdrop-filter: blur(5px);
+}
+
+/* 页脚动态背景支持 */
+:root.dynamic-bg-enabled .footer {
+  backdrop-filter: blur(5px);
+}
+
+/* 分类标签动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .category {
+  background-color: rgba(238, 238, 238, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .category {
+  background-color: rgba(70, 70, 70, 0.9) !important;
+}
+
+/* 通知组件动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .notice {
+  background-color: rgba(191, 207, 225, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .notice {
+  background-color: rgba(51, 73, 96, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--light .notice--update {
+  background-color: rgba(185, 239, 208, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .notice--update {
+  background-color: rgba(45, 106, 79, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--light .notice--warning {
+  background-color: rgba(249, 188, 186, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .notice--warning {
+  background-color: rgba(108, 54, 57, 0.9) !important;
+}
+
+/* 联系表单动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .contact-form,
+:root.dynamic-bg-enabled .theme--light .contact-form input,
+:root.dynamic-bg-enabled .theme--light .contact-form textarea {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .contact-form,
+:root.dynamic-bg-enabled .theme--dark .contact-form input,
+:root.dynamic-bg-enabled .theme--dark .contact-form textarea {
+  background-color: rgba(21, 32, 40, 0.95) !important;
+}
+
+/* 导航汉堡菜单动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .navbar-burger__line {
+  background-color: rgba(70, 70, 70, 0.9) !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .navbar-burger__line {
+  background-color: rgba(238, 238, 238, 0.9) !important;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .theme--light .dynamic-background,
+  .theme--dark .dynamic-background {
+    animation-duration: 25s;
+  }
+  
+  .theme--dark .dynamic-background::before {
+    background-size: 200px 120px;
+    animation-duration: 30s;
+  }
+  
+  .theme--dark .dynamic-background::after {
+    background-size: 250px 150px;
+    animation-duration: 25s;
+  }
+}
+
+/* 无障碍访问支持 */
+@media (prefers-reduced-motion: reduce) {
+  .dynamic-background,
+  .dynamic-background::before,
+  .dynamic-background::after {
+    animation: none !important;
+  }
+}
+
+/* 高对比度模式禁用 */
+@media (prefers-contrast: high) {
+  :root.dynamic-bg-enabled .dynamic-background {
+    display: none;
+  }
+}
+
+/* 打印时隐藏动态背景 */
+@media print {
+  .dynamic-background {
+    display: none !important;
+  }
+}
+
+/* 确保在高分辨率屏幕上效果良好 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .theme--dark .dynamic-background::before,
+  .theme--dark .dynamic-background::after {
+    background-size: 240px 160px, 300px 200px;
+  }
+}
+
+/* 确保内容在背景之上 */
+.body {
+  position: relative;
+  z-index: 1;
+  --body-bg: transparent; /* 设置body背景为透明以显示动态背景 */
+}
+
+/* 为没有动态背景的情况保留原始背景 */
+.body:not(.dynamic-bg-enabled) {
+  --body-bg: unset;
+}
+
+/* 主内容区域动态背景支持 */
+:root.dynamic-bg-enabled .theme--light .wrapper__main {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+:root.dynamic-bg-enabled .theme--dark .wrapper__main {
+  background-color: rgba(21, 32, 40, 0.82) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 文章内容区域增强 */
+:root.dynamic-bg-enabled .theme--light .post__content {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 6px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content {
+  background-color: rgba(21, 32, 40, 0.95) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 6px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 文章元信息区域 */
+:root.dynamic-bg-enabled .theme--light .post__meta {
+  background-color: rgba(248, 249, 250, 0.9) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__meta {
+  background-color: rgba(30, 45, 55, 0.9) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+/* 增强导航栏背景效果 */
+:root.dynamic-bg-enabled .theme--light .header {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+}
+
+:root.dynamic-bg-enabled .theme--dark .header {
+  background-color: rgba(21, 32, 40, 0.96) !important;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* 页面标题区域 */
+:root.dynamic-bg-enabled .theme--light .post h1,
+:root.dynamic-bg-enabled .theme--light .post h2 {
+  background-color: rgba(248, 249, 250, 0.8) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 20px 0 16px 0;
+  border-left: 3px solid rgba(35, 166, 213, 0.6);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post h1,
+:root.dynamic-bg-enabled .theme--dark .post h2 {
+  background-color: rgba(30, 45, 55, 0.8) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 20px 0 16px 0;
+  border-left: 3px solid rgba(35, 166, 213, 0.8);
+} 
