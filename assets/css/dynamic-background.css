@@ -21,7 +21,7 @@
   overflow: hidden;
   pointer-events: none;
   opacity: 0; /* 默认隐藏 */
-  transition: opacity 0.5s ease;
+  transition: opacity 0.8s ease, transform 0.3s ease;
 }
 
 /* 仅当启用时显示动态背景 */
@@ -54,49 +54,195 @@
   animation: lightPulse 15s ease-in-out infinite alternate;
 }
 
-/* 夜晚模式动态背景 */
+/* 夜晚模式动态背景 - 极光紫色主题 */
 .theme--dark .dynamic-background {
   background: 
-    radial-gradient(ellipse at top, rgba(12, 12, 12, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse at bottom, rgba(44, 24, 16, 0.12) 0%, transparent 70%);
-  animation: darkGradient 30s ease infinite;
+    linear-gradient(135deg, 
+      rgba(25, 13, 42, 0.15) 0%,    /* 深紫夜空 */
+      rgba(45, 27, 59, 0.18) 25%,   /* 深紫罗兰 */
+      rgba(62, 39, 76, 0.12) 50%,   /* 中紫色 */
+      rgba(52, 29, 67, 0.20) 75%,   /* 深紫蓝 */
+      rgba(21, 14, 35, 0.16) 100%   /* 深紫黑 */
+    ),
+    radial-gradient(ellipse at 20% 30%, rgba(138, 43, 226, 0.08) 0%, transparent 60%),  /* 极光紫 */
+    radial-gradient(ellipse at 80% 70%, rgba(72, 61, 139, 0.06) 0%, transparent 50%),  /* 暗紫蓝 */
+    radial-gradient(ellipse at 50% 20%, rgba(186, 85, 211, 0.04) 0%, transparent 70%); /* 淡紫极光 */
+  background-size: 300% 300%, 120% 120%, 150% 150%, 200% 200%;
+  animation: auroraGradient 45s ease infinite;
 }
 
-.theme--dark .dynamic-background::before {
-  content: '';
-  position: absolute;
+/* 常驻星光容器 */
+.starfield {
+  position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(1px 1px at 20% 10%, rgba(255,255,255,0.15), transparent),
-    radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.12), transparent),
-    radial-gradient(0.8px 0.8px at 80% 60%, rgba(255,255,255,0.18), transparent),
-    radial-gradient(0.8px 0.8px at 30% 80%, rgba(255,255,255,0.10), transparent),
-    radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.14), transparent);
-  background-repeat: repeat;
-  background-size: 250px 150px;
-  animation: sparkle 25s linear infinite, darkPulse 10s ease-in-out infinite alternate;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -998;
+  opacity: 1;
 }
 
-.theme--dark .dynamic-background::after {
+.star {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: starTwinkle linear infinite;
+}
+
+/* 不同大小的星星 */
+.star.size-1 {
+  width: 1px;
+  height: 1px;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.star.size-2 {
+  width: 2px;
+  height: 2px;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+}
+
+.star.size-3 {
+  width: 3px;
+  height: 3px;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+}
+
+.star.size-4 {
+  width: 1.5px;
+  height: 1.5px;
+  box-shadow: 0 0 3px rgba(173, 216, 230, 0.8);
+  background: rgba(173, 216, 230, 0.9);
+}
+
+.star.size-5 {
+  width: 2.5px;
+  height: 2.5px;
+  box-shadow: 0 0 5px rgba(221, 160, 221, 0.7);
+  background: rgba(221, 160, 221, 0.8);
+}
+
+/* 特殊的十字星效果 */
+.star.cross-star::before,
+.star.cross-star::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(0.6px 0.6px at 40% 40%, rgba(255,255,255,0.08), transparent),
-    radial-gradient(0.6px 0.6px at 70% 20%, rgba(255,255,255,0.06), transparent),
-    radial-gradient(0.4px 0.4px at 10% 70%, rgba(255,255,255,0.12), transparent);
-  background-repeat: repeat;
-  background-size: 300px 200px;
-  animation: twinkle 20s linear infinite reverse;
+  background: inherit;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-/* 动画定义 */
+.star.cross-star::before {
+  width: 8px;
+  height: 1px;
+}
+
+.star.cross-star::after {
+  width: 1px;
+  height: 8px;
+}
+
+/* ================ 特殊效果元素 ================ */
+
+/* 花瓣容器 */
+.weather-petals {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -999;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.weather-petals.active {
+  opacity: 1;
+}
+
+.petal {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(ellipse, rgba(255,105,180,0.9) 0%, rgba(255,182,193,0.8) 50%, rgba(255,160,122,0.6) 100%);
+  border-radius: 50% 0 50% 0;
+  animation: petalFall linear infinite;
+  box-shadow: 0 0 4px rgba(255,105,180,0.5);
+}
+
+.petal:nth-child(odd) {
+  background: radial-gradient(ellipse, rgba(255,192,203,0.9) 0%, rgba(255,160,122,0.7) 50%, rgba(255,105,180,0.5) 100%);
+  transform: rotate(45deg);
+  width: 10px;
+  height: 10px;
+}
+
+/* 雨滴容器 */
+.weather-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -999;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.weather-rain.active {
+  opacity: 1;
+}
+
+.raindrop {
+  position: absolute;
+  width: 3px;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(70,130,180,0.9) 0%, rgba(135,206,235,0.8) 30%, rgba(100,149,237,0.9) 100%);
+  border-radius: 2px 2px 50% 50%;
+  animation: rainFall linear infinite;
+  box-shadow: 0 0 2px rgba(70,130,180,0.6);
+}
+
+/* 雪花容器 */
+.weather-snow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: -999;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.weather-snow.active {
+  opacity: 1;
+}
+
+.snowflake {
+  position: absolute;
+  color: rgba(255,255,255,0.9);
+  font-size: 16px;
+  animation: snowFall linear infinite;
+  user-select: none;
+  text-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+
+.snowflake:nth-child(even) {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 0 2px rgba(255,255,255,0.6);
+}
+
+/* 月亮和流星效果已移除，夜晚模式现在只有常驻星光 */
+
+/* ================ 动画定义 ================ */
+
 @keyframes lightGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -108,27 +254,132 @@
   100% { opacity: 1; }
 }
 
-@keyframes darkGradient {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.02); }
-  100% { transform: rotate(360deg) scale(1); }
+@keyframes auroraGradient {
+  0% { 
+    background-position: 0% 50%, 0% 0%, 0% 0%, 0% 0%; 
+    transform: scale(1);
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  20% { 
+    background-position: 30% 80%, 15% 25%, 70% 30%, 25% 15%; 
+    transform: scale(1.005);
+    filter: hue-rotate(8deg) brightness(1.08);
+  }
+  40% { 
+    background-position: 70% 20%, 40% 60%, 30% 70%, 60% 40%; 
+    transform: scale(1.01);
+    filter: hue-rotate(15deg) brightness(1.15);
+  }
+  60% { 
+    background-position: 100% 70%, 65% 10%, 80% 20%, 80% 75%; 
+    transform: scale(1.005);
+    filter: hue-rotate(10deg) brightness(1.1);
+  }
+  80% { 
+    background-position: 130% 40%, 80% 45%, 10% 60%, 40% 90%; 
+    transform: scale(1);
+    filter: hue-rotate(3deg) brightness(1.02);
+  }
+  100% { 
+    background-position: 0% 50%, 0% 0%, 0% 0%, 0% 0%; 
+    transform: scale(1);
+    filter: hue-rotate(0deg) brightness(1);
+  }
 }
 
-@keyframes sparkle {
-  0% { transform: translateX(0) translateY(0); }
-  100% { transform: translateX(-250px) translateY(-150px); }
+/* sparkle动画已移除，不再使用 */
+
+/* 星星闪烁动画 */
+@keyframes starTwinkle {
+  0% { 
+    opacity: 0.3; 
+    transform: scale(1);
+  }
+  20% { 
+    opacity: 1; 
+    transform: scale(1.2);
+  }
+  40% { 
+    opacity: 0.6; 
+    transform: scale(0.8);
+  }
+  60% { 
+    opacity: 0.9; 
+    transform: scale(1.1);
+  }
+  80% { 
+    opacity: 0.4; 
+    transform: scale(0.9);
+  }
+  100% { 
+    opacity: 0.3; 
+    transform: scale(1);
+  }
 }
 
-@keyframes darkPulse {
-  0% { opacity: 0.9; }
-  100% { opacity: 1; }
+/* 慢速闪烁动画 */
+@keyframes starTwinkleSlow {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.2; }
 }
 
-@keyframes twinkle {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-100px) scale(1.1); }
-  100% { transform: translateY(-200px) scale(1); }
+/* 快速闪烁动画 */
+@keyframes starTwinkleFast {
+  0% { opacity: 0.5; transform: scale(1); }
+  25% { opacity: 1; transform: scale(1.3); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+  75% { opacity: 0.9; transform: scale(1.1); }
+  100% { opacity: 0.5; transform: scale(1); }
 }
+
+/* 花瓣飘落动画 */
+@keyframes petalFall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(calc(100vh + 20px)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 雨滴动画 */
+@keyframes rainFall {
+  0% {
+    transform: translateY(-20px);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(100vh + 20px));
+    opacity: 0;
+  }
+}
+
+/* 雪花飘落动画 */
+@keyframes snowFall {
+  0% {
+    transform: translateY(-10px) translateX(0px) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(50vh) translateX(20px) rotate(180deg);
+  }
+  100% {
+    transform: translateY(calc(100vh + 20px)) translateX(-10px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 保留空白 - 月亮和流星动画已移除 */
 
 /* 当启用动态背景时，让部分背景变为半透明以显示效果 */
 :root.dynamic-bg-enabled .theme--light .body {
@@ -136,7 +387,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .body {
-  background-color: rgba(21, 32, 40, 0.85) !important;
+  background-color: rgba(25, 20, 35, 0.85) !important;
 }
 
 /* 原有header定义已移至文件末尾以避免重复 */
@@ -148,7 +399,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .post {
-  background-color: rgba(21, 32, 40, 0.88) !important;
+  background-color: rgba(25, 20, 35, 0.88) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -160,7 +411,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .nav__list {
-  background-color: rgba(70, 70, 70, 0.85) !important;
+  background-color: rgba(40, 30, 50, 0.85) !important;
   backdrop-filter: blur(8px);
 }
 
@@ -171,7 +422,7 @@
   }
   
   :root.dynamic-bg-enabled .theme--dark .nav__list {
-    background-color: rgba(21, 32, 40, 0.92) !important;
+    background-color: rgba(25, 20, 35, 0.92) !important;
   }
 }
 
@@ -182,7 +433,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .optionswitch__list {
-  background: rgba(70, 70, 70, 0.9) !important;
+  background: rgba(40, 30, 50, 0.9) !important;
   backdrop-filter: blur(12px);
 }
 
@@ -192,8 +443,8 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .optionswitch__triangle::before {
-  background: rgba(70, 70, 70, 0.9) !important;
-  border-color: rgba(70, 70, 70, 0.9) !important;
+  background: rgba(40, 30, 50, 0.9) !important;
+  border-color: rgba(40, 30, 50, 0.9) !important;
 }
 
 /* 作品集组件动态背景支持 */
@@ -204,7 +455,7 @@
 
 :root.dynamic-bg-enabled .theme--dark .portfolio__image-wrapper--left,
 :root.dynamic-bg-enabled .theme--dark .portfolio__image-wrapper--right {
-  background-color: rgba(21, 32, 40, 0.95) !important;
+  background-color: rgba(25, 20, 35, 0.95) !important;
 }
 
 :root.dynamic-bg-enabled .theme--light .portfolio__description {
@@ -212,7 +463,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .portfolio__description {
-  background-color: rgba(21, 32, 40, 0.95) !important;
+  background-color: rgba(25, 20, 35, 0.95) !important;
 }
 
 /* 代码块动态背景支持 */
@@ -237,7 +488,7 @@
   }
   
   :root.dynamic-bg-enabled .theme--dark .sidebar {
-    background: linear-gradient(135deg, rgba(21, 32, 40, 0.1) 0%, rgba(21, 32, 40, 0.05) 100%);
+    background: linear-gradient(135deg, rgba(25, 20, 35, 0.1) 0%, rgba(25, 20, 35, 0.05) 100%);
   }
 }
 
@@ -257,7 +508,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .category {
-  background-color: rgba(70, 70, 70, 0.9) !important;
+  background-color: rgba(60, 45, 75, 0.9) !important;
 }
 
 /* 通知组件动态背景支持 */
@@ -295,7 +546,7 @@
 :root.dynamic-bg-enabled .theme--dark .contact-form,
 :root.dynamic-bg-enabled .theme--dark .contact-form input,
 :root.dynamic-bg-enabled .theme--dark .contact-form textarea {
-  background-color: rgba(21, 32, 40, 0.95) !important;
+  background-color: rgba(25, 20, 35, 0.95) !important;
 }
 
 /* 导航汉堡菜单动态背景支持 */
@@ -311,26 +562,33 @@
 @media (max-width: 768px) {
   .theme--light .dynamic-background,
   .theme--dark .dynamic-background {
-    animation-duration: 25s;
-  }
-  
-  .theme--dark .dynamic-background::before {
-    background-size: 200px 120px;
     animation-duration: 30s;
   }
   
-  .theme--dark .dynamic-background::after {
-    background-size: 250px 150px;
-    animation-duration: 25s;
+  /* 移动端星光效果优化 */
+  .starfield {
+    opacity: 0.9;
+  }
+  
+  .star {
+    transform: scale(0.9);
+  }
+  
+  .star.cross-star::before,
+  .star.cross-star::after {
+    opacity: 0.8;
   }
 }
 
 /* 无障碍访问支持 */
 @media (prefers-reduced-motion: reduce) {
   .dynamic-background,
-  .dynamic-background::before,
-  .dynamic-background::after {
+  .star {
     animation: none !important;
+  }
+  
+  .starfield {
+    opacity: 0.5 !important;
   }
 }
 
@@ -348,11 +606,15 @@
   }
 }
 
-/* 确保在高分辨率屏幕上效果良好 */
+/* 确保在高分辨率屏幕上星光效果良好 */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .theme--dark .dynamic-background::before,
-  .theme--dark .dynamic-background::after {
-    background-size: 240px 160px, 300px 200px;
+  .star {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+  }
+  
+  .star.cross-star::before,
+  .star.cross-star::after {
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -378,7 +640,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .wrapper__main {
-  background-color: rgba(21, 32, 40, 0.82) !important;
+  background-color: rgba(25, 20, 35, 0.82) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 8px;
@@ -397,7 +659,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .post__content {
-  background-color: rgba(21, 32, 40, 0.95) !important;
+  background-color: rgba(25, 20, 35, 0.95) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 6px;
@@ -417,7 +679,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .post__meta {
-  background-color: rgba(30, 45, 55, 0.9) !important;
+  background-color: rgba(35, 25, 45, 0.9) !important;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   border-radius: 4px;
@@ -437,7 +699,7 @@
 }
 
 :root.dynamic-bg-enabled .theme--dark .header {
-  background-color: rgba(21, 32, 40, 0.96) !important;
+  background-color: rgba(25, 20, 35, 0.96) !important;
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-radius: 8px;
@@ -460,11 +722,321 @@
 
 :root.dynamic-bg-enabled .theme--dark .post h1,
 :root.dynamic-bg-enabled .theme--dark .post h2 {
-  background-color: rgba(30, 45, 55, 0.8) !important;
+  background-color: rgba(35, 25, 45, 0.8) !important;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border-radius: 4px;
   padding: 12px 16px;
   margin: 20px 0 16px 0;
-  border-left: 3px solid rgba(35, 166, 213, 0.8);
+  border-left: 3px solid rgba(138, 43, 226, 0.8);
+}
+
+/* ================ 页面切换柔和过渡效果 ================ */
+
+/* 全局平滑过渡 */
+html {
+  transition: background-color 0.6s ease, color 0.4s ease;
+}
+
+body {
+  transition: background-color 0.6s ease, color 0.4s ease;
+}
+
+/* 主要内容区域过渡 */
+.wrapper__main,
+.post,
+.post__content,
+.sidebar,
+.header {
+  transition: all 0.4s ease, transform 0.3s ease, background-color 0.5s ease, backdrop-filter 0.3s ease;
+}
+
+/* 导航栏平滑过渡 */
+.nav__list,
+.nav__link {
+  transition: all 0.3s ease, background-color 0.4s ease, color 0.3s ease;
+}
+
+.nav__link:hover {
+  transition: all 0.2s ease;
+}
+
+/* 选项切换器过渡 */
+.optionswitch__list,
+.optionswitch__triangle::before {
+  transition: all 0.3s ease, background-color 0.4s ease;
+}
+
+/* 作品集组件过渡 */
+.portfolio__description,
+.portfolio__image-wrapper--left,
+.portfolio__image-wrapper--right {
+  transition: all 0.4s ease, transform 0.3s ease;
+}
+
+/* 文章元素过渡 */
+.post__meta,
+.post__footer,
+.post h1,
+.post h2,
+.post h3 {
+  transition: all 0.3s ease, background-color 0.4s ease;
+}
+
+/* 代码块过渡 */
+.post__content pre,
+.post__content blockquote {
+  transition: all 0.3s ease, background-color 0.4s ease, border-color 0.3s ease;
+}
+
+/* 分类和标签过渡 */
+.category,
+.tag {
+  transition: all 0.3s ease, background-color 0.4s ease, transform 0.2s ease;
+}
+
+.category:hover,
+.tag:hover {
+  transform: translateY(-1px);
+}
+
+/* 通知组件过渡 */
+.notice {
+  transition: all 0.3s ease, background-color 0.4s ease, border-color 0.3s ease;
+}
+
+/* 联系表单过渡 */
+.contact-form,
+.contact-form input,
+.contact-form textarea {
+  transition: all 0.3s ease, background-color 0.4s ease, border-color 0.3s ease;
+}
+
+/* 评论区过渡 */
+.comment {
+  transition: all 0.3s ease, background-color 0.4s ease;
+}
+
+/* 页脚过渡 */
+.footer {
+  transition: all 0.3s ease, background-color 0.4s ease;
+}
+
+/* 汉堡菜单过渡 */
+.navbar-burger__line {
+  transition: all 0.3s ease, background-color 0.4s ease, transform 0.2s ease;
+}
+
+/* 链接过渡效果 */
+a {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+/* 表格过渡 */
+table {
+  transition: all 0.3s ease, background-color 0.4s ease;
+}
+
+/* 主题切换时的全局过渡效果 */
+.theme--light,
+.theme--dark {
+  transition: all 0.6s ease;
+}
+
+/* 主题切换过程中的特殊样式 */
+.theme-transitioning {
+  overflow-x: hidden;
+}
+
+.theme-transitioning * {
+  transition-duration: 0.6s !important;
+  transition-timing-function: ease !important;
+}
+
+.theme-transitioning .wrapper__main {
+  transform: scale(0.998);
+  transition: transform 0.6s ease, background-color 0.8s ease;
+}
+
+.theme-transitioning .header {
+  transition: all 0.7s ease;
+}
+
+.theme-transitioning .sidebar {
+  transition: all 0.6s ease;
+}
+
+/* 页面加载时的渐入效果 */
+@keyframes pageLoadFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wrapper__main {
+  animation: pageLoadFadeIn 0.6s ease-out;
+}
+
+/* 导航切换时的平滑效果 */
+@keyframes navTransition {
+  from {
+    opacity: 0.8;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nav__list-item {
+  animation: navTransition 0.3s ease-out;
+}
+
+/* 内容切换时的淡入效果 */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post__content > *:not(.notice) {
+  animation: contentFadeIn 0.4s ease-out;
+}
+
+/* 减少动画偏好的用户 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 确保滚动行为平滑 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 焦点时的柔和过渡 */
+*:focus {
+  transition: all 0.2s ease;
+}
+
+/* 页面滚动时的优化 */
+.wrapper__main {
+  will-change: transform;
+}
+
+/* 鼠标悬停时的微妙效果 */
+.post:hover,
+.portfolio__description:hover {
+  transform: translateY(-2px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+:root.dynamic-bg-enabled .post:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* 导航项激活时的流畅过渡 */
+.nav__link.nav__link--active {
+  transition: all 0.4s ease;
+}
+
+/* 按钮和交互元素的微妙反馈 */
+button,
+.btn,
+input[type="submit"] {
+  transition: all 0.2s ease, transform 0.1s ease;
+}
+
+button:hover,
+.btn:hover,
+input[type="submit"]:hover {
+  transform: translateY(-1px);
+}
+
+button:active,
+.btn:active,
+input[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* 图片加载时的淡入效果 */
+img {
+  transition: opacity 0.4s ease, transform 0.3s ease;
+}
+
+img:hover {
+  transform: scale(1.01);
+}
+
+/* 列表项的渐入效果 */
+.nav__list-item,
+.category,
+.tag {
+  transition: all 0.3s ease, transform 0.2s ease;
+}
+
+/* 优化选择文本时的体验 */
+::selection {
+  background-color: rgba(35, 166, 213, 0.3);
+  color: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.theme--dark ::selection {
+  background-color: rgba(35, 166, 213, 0.4);
+}
+
+/* 内容加载时的视觉改善 */
+.post__content {
+  will-change: opacity;
+}
+
+/* 表单元素的流畅交互 */
+input,
+textarea,
+select {
+  transition: all 0.3s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+/* 移动端触摸优化 */
+@media (max-width: 768px) {
+  .post:hover,
+  .portfolio__description:hover {
+    transform: none; /* 移动端不需要悬停效果 */
+  }
+  
+  /* 移动端点击反馈 */
+  .nav__link:active,
+  button:active,
+  .btn:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
 } 

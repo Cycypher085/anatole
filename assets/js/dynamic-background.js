@@ -3,12 +3,14 @@ class DynamicBackgroundManager {
   constructor() {
     this.backgroundElement = null;
     this.isEnabled = false;
+    this.weatherManager = null;
     this.init();
   }
 
   init() {
     this.createBackgroundElement();
     this.attachEventListeners();
+    this.initWeatherManager();
     this.enable(); // 默认启用
   }
 
@@ -28,6 +30,10 @@ class DynamicBackgroundManager {
     document.body.insertBefore(this.backgroundElement, document.body.firstChild);
     
     console.log('动态背景元素已创建');
+  }
+
+  initWeatherManager() {
+    this.weatherManager = new WeatherEffectManager(this.backgroundElement);
   }
 
   attachEventListeners() {
@@ -59,14 +65,27 @@ class DynamicBackgroundManager {
 
   handleThemeChange() {
     if (this.backgroundElement && this.isEnabled) {
-      // 主题切换时添加平滑过渡效果
-      this.backgroundElement.style.transform = 'scale(1.005)';
-      this.backgroundElement.style.filter = 'brightness(1.1)';
+      // 主题切换时添加更柔和的过渡效果
+      this.backgroundElement.style.transition = 'all 0.8s ease, opacity 1s ease';
+      this.backgroundElement.style.transform = 'scale(1.002)';
+      this.backgroundElement.style.filter = 'brightness(1.05)';
+      
+      // 为页面添加切换过渡类
+      document.body.classList.add('theme-transitioning');
       
       setTimeout(() => {
         this.backgroundElement.style.transform = 'scale(1)';
         this.backgroundElement.style.filter = 'brightness(1)';
       }, 300);
+      
+      setTimeout(() => {
+        document.body.classList.remove('theme-transitioning');
+      }, 800);
+
+      // 通知天气管理器主题变化
+      if (this.weatherManager) {
+        this.weatherManager.onThemeChange();
+      }
     }
   }
 
@@ -76,6 +95,11 @@ class DynamicBackgroundManager {
       // 强制重新计算位置
       this.backgroundElement.style.width = '100vw';
       this.backgroundElement.style.height = '100vh';
+      
+      // 通知天气管理器尺寸变化
+      if (this.weatherManager) {
+        this.weatherManager.onResize();
+      }
     }
   }
 
@@ -84,8 +108,14 @@ class DynamicBackgroundManager {
       // 页面不可见时暂停动画以节省资源
       if (document.hidden) {
         this.backgroundElement.style.animationPlayState = 'paused';
+        if (this.weatherManager) {
+          this.weatherManager.pause();
+        }
       } else {
         this.backgroundElement.style.animationPlayState = 'running';
+        if (this.weatherManager) {
+          this.weatherManager.resume();
+        }
       }
     }
   }
@@ -100,6 +130,11 @@ class DynamicBackgroundManager {
     document.documentElement.classList.add('dynamic-bg-enabled');
     this.isEnabled = true;
     
+    // 启动天气效果
+    if (this.weatherManager) {
+      this.weatherManager.start();
+    }
+    
     console.log('动态背景已启用');
   }
 
@@ -108,6 +143,11 @@ class DynamicBackgroundManager {
     // 从html根元素移除启用类
     document.documentElement.classList.remove('dynamic-bg-enabled');
     this.isEnabled = false;
+    
+    // 停止天气效果
+    if (this.weatherManager) {
+      this.weatherManager.stop();
+    }
     
     console.log('动态背景已禁用');
   }
@@ -143,7 +183,8 @@ class DynamicBackgroundManager {
       prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       prefersHighContrast: window.matchMedia('(prefers-contrast: high)').matches,
       supportedComponents: this.getSupportedComponents(),
-      currentTheme: this.getCurrentTheme()
+      currentTheme: this.getCurrentTheme(),
+      weatherEffects: this.weatherManager ? this.weatherManager.getStatus() : null
     };
   }
 
@@ -198,124 +239,602 @@ class DynamicBackgroundManager {
     }
 
     const levels = {
-      'subtle': { body: 0.98, header: 0.99, post: 0.98, nav: 0.95, wrapper: 0.98, content: 0.98, meta: 0.96 },
-      'normal': { body: 0.95, header: 0.98, post: 0.97, nav: 0.92, wrapper: 0.93, content: 0.95, meta: 0.90 },
-      'strong': { body: 0.90, header: 0.95, post: 0.93, nav: 0.85, wrapper: 0.88, content: 0.90, meta: 0.85 },
-              'intense': { body: 0.85, header: 0.90, post: 0.88, nav: 0.80, wrapper: 0.82, content: 0.85, meta: 0.78 }
+      low: { light: 0.95, dark: 0.92 },
+      medium: { light: 0.90, dark: 0.88 },
+      high: { light: 0.85, dark: 0.82 }
     };
 
-    const setting = levels[level];
-    if (!setting) {
-      console.error('无效的透明度级别，请使用: subtle, normal, strong, intense');
+    if (!levels[level]) {
+      console.warn('无效的透明度级别:', level);
       return;
     }
 
-    const theme = this.getCurrentTheme();
-    const baseColor = theme === 'dark' ? '21, 32, 40' : '255, 255, 255';
-
-    // 动态创建样式
-    let styleEl = document.getElementById('dynamic-bg-custom-transparency');
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = 'dynamic-bg-custom-transparency';
-      document.head.appendChild(styleEl);
-    }
-
-    styleEl.textContent = `
-      :root.dynamic-bg-enabled .theme--${theme} .body { 
-        background-color: rgba(${baseColor}, ${setting.body}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .header { 
-        background-color: rgba(${baseColor}, ${setting.header}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .post { 
-        background-color: rgba(${baseColor}, ${setting.post}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .nav__list { 
-        background-color: rgba(${baseColor}, ${setting.nav}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .wrapper__main { 
-        background-color: rgba(${baseColor}, ${setting.wrapper}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .post__content { 
-        background-color: rgba(${baseColor}, ${setting.content}) !important; 
-      }
-      :root.dynamic-bg-enabled .theme--${theme} .post__meta { 
-        background-color: rgba(${baseColor}, ${setting.meta}) !important; 
-      }
-    `;
-
-    console.log(`已设置透明度级别为: ${level}`);
+    const currentTheme = this.getCurrentTheme();
+    const opacity = levels[level][currentTheme];
+    
+    document.documentElement.style.setProperty('--component-bg-opacity', opacity);
   }
 
-  // 重置为默认透明度
+  // 重置透明度
   resetTransparency() {
-    const styleEl = document.getElementById('dynamic-bg-custom-transparency');
-    if (styleEl) {
-      styleEl.remove();
-      console.log('已重置为默认透明度设置');
-    }
+    document.documentElement.style.removeProperty('--component-bg-opacity');
   }
 
-  // 完全销毁动态背景
+  // 销毁管理器
   destroy() {
-    this.disable();
+    if (this.weatherManager) {
+      this.weatherManager.destroy();
+    }
     
     if (this.backgroundElement) {
       this.backgroundElement.remove();
       this.backgroundElement = null;
     }
     
-    console.log('动态背景已销毁');
+    document.documentElement.classList.remove('dynamic-bg-enabled');
+    this.isEnabled = false;
   }
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    // 强制启用动态背景用于调试
-    window.dynamicBackground = new DynamicBackgroundManager();
+// 天气效果管理器
+class WeatherEffectManager {
+  constructor(container) {
+    this.container = container;
+    this.isActive = false;
+    this.currentEffects = new Set();
+    this.intervals = new Map();
+    this.timeouts = new Map();
+    this.starfield = null;
+    this.stars = [];
+    this.maxStars = 80; // 最大星星数量
     
-    // 添加控制台命令提示
-    console.log('%c🎨 动态背景系统已加载', 'color: #6086b4; font-weight: bold; font-size: 14px;');
-    console.log('%c📋 基本控制命令:', 'color: #23a6d5; font-weight: bold;');
-    console.log('   %cwindow.dynamicBackground.toggle()%c - 切换开关', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
-    console.log('   %cwindow.dynamicBackground.disable()%c - 禁用动态背景', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
-    console.log('   %cwindow.dynamicBackground.enable()%c - 启用动态背景', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
+    // 效果持续时间配置（毫秒）
+    this.durations = {
+      petals: { min: 20000, max: 35000 }   // 花瓣 20-35秒（更长的持续时间）
+    };
     
-    console.log('%c🔍 状态查询命令:', 'color: #23a6d5; font-weight: bold;');
-    console.log('   %cwindow.dynamicBackground.getStatus()%c - 获取详细状态', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
-    console.log('   %cwindow.dynamicBackground.getSupportedComponents()%c - 查看支持的组件', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
-    console.log('   %cwindow.dynamicBackground.getEffectIntensity()%c - 查看效果强度', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
+    // 触发间隔配置（毫秒）
+    this.triggerIntervals = {
+      light: { min: 15000, max: 35000 }     // 白天花瓣效果 15-35秒（更温和的频率）
+    };
     
-    console.log('%c⚙️ 高级控制命令:', 'color: #23a6d5; font-weight: bold;');
-    console.log('   %cwindow.dynamicBackground.setComponentTransparency("normal")%c - 设置透明度', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
-    console.log('     可选级别: subtle, normal, strong, intense');
-    console.log('   %cwindow.dynamicBackground.resetTransparency()%c - 重置透明度', 'color: #ee7752; background: #f5f5f5; padding: 2px 4px; border-radius: 3px;', '');
+    this.init();
+  }
+
+  init() {
+    this.createEffectContainers();
+  }
+
+  createEffectContainers() {
+    // 花瓣容器
+    this.petalsContainer = document.createElement('div');
+    this.petalsContainer.className = 'weather-petals';
     
-    console.log('%c✨ 支持的组件数量:', `color: #23d5ab; font-weight: bold;`, window.dynamicBackground.getSupportedComponents().filter(c => c.exists).length);
-    console.log('%c🎭 当前主题:', `color: #e73c7e; font-weight: bold;`, window.dynamicBackground.getCurrentTheme());
+    // 雨滴容器
+    this.rainContainer = document.createElement('div');
+    this.rainContainer.className = 'weather-rain';
     
-    // 检查用户偏好设置
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const prefersHighContrast = window.matchMedia('(prefers-contrast: high)').matches;
-    const isPrintMode = window.matchMedia('print').matches;
+    // 雪花容器
+    this.snowContainer = document.createElement('div');
+    this.snowContainer.className = 'weather-snow';
     
-    if (prefersReducedMotion || prefersHighContrast || isPrintMode) {
-      const reasons = [];
-      if (prefersReducedMotion) reasons.push('用户偏好减少动画');
-      if (prefersHighContrast) reasons.push('用户偏好高对比度');
-      if (isPrintMode) reasons.push('打印模式');
+    // 星光容器
+    this.starfield = document.createElement('div');
+    this.starfield.className = 'starfield';
+    
+    // 添加到主容器
+    this.container.appendChild(this.petalsContainer);
+    this.container.appendChild(this.rainContainer);
+    this.container.appendChild(this.snowContainer);
+    this.container.appendChild(this.starfield);
+  }
+
+  start() {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    
+    // 立即触发一个效果进行测试
+    setTimeout(() => {
+      this.triggerImmediateEffect();
+    }, 2000);
+    
+    this.scheduleNextEffect();
+    console.log('天气效果管理器已启动');
+  }
+
+  triggerImmediateEffect() {
+    const theme = this.getCurrentTheme();
+    
+    if (theme === 'light') {
+      // 白天模式立即显示温和的花瓣效果
+      console.log('启动白天模式温和花瓣效果');
+      this.startEffect('petals');
+    } else {
+      // 夜晚模式启动星光
+      console.log('启动夜晚模式常驻星光');
+      this.startStarfield();
+    }
+  }
+
+  stop() {
+    if (!this.isActive) return;
+    
+    this.isActive = false;
+    this.clearAllEffects();
+    this.stopStarfield(); // 停止星光
+    this.clearAllTimers();
+    console.log('天气效果管理器已停止');
+  }
+
+  pause() {
+    this.clearAllTimers();
+  }
+
+  resume() {
+    if (this.isActive) {
+      this.scheduleNextEffect();
+    }
+  }
+
+  onThemeChange() {
+    // 主题切换时重新调度效果
+    if (this.isActive) {
+      this.clearAllTimers();
+      this.clearAllEffects();
       
-      console.warn(`⚠️ 检测到用户偏好限制 (${reasons.join(', ')})，但动态背景仍已启用`);
+      setTimeout(() => {
+        const theme = this.getCurrentTheme();
+        if (theme === 'light') {
+          // 白天模式恢复随机效果调度
+          this.scheduleNextEffect();
+        } else {
+          // 夜晚模式启动星光
+          this.startStarfield();
+        }
+      }, 1000);
+    }
+  }
+
+  onResize() {
+    // 窗口大小变化时重新创建粒子元素
+    this.clearAllEffects();
+  }
+
+  scheduleNextEffect() {
+    if (!this.isActive) return;
+    
+    const theme = this.getCurrentTheme();
+    
+    // 只有白天模式才需要调度随机效果
+    if (theme === 'light') {
+      const interval = this.triggerIntervals[theme];
+      const nextDelay = this.randomBetween(interval.min, interval.max);
+      
+      const timeoutId = setTimeout(() => {
+        this.triggerRandomEffect();
+        this.scheduleNextEffect(); // 递归调度下一个效果
+      }, nextDelay);
+      
+      this.timeouts.set('nextEffect', timeoutId);
+    }
+    // 夜晚模式不需要调度，星光是常驻的
+  }
+
+  triggerRandomEffect() {
+    if (!this.isActive) return;
+    
+    const theme = this.getCurrentTheme();
+    
+    // 只有白天模式才触发随机效果，夜晚模式只有常驻星光
+    if (theme === 'light') {
+      // 白天模式只有花瓣效果
+      const availableEffects = ['petals'];
+      
+      // 避免同时触发太多效果
+      if (this.currentEffects.size >= 1) {
+        return;
+      }
+      
+      const effect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
+      this.startEffect(effect);
+    }
+    // 夜晚模式不触发随机效果，星光是常驻的
+  }
+
+  startEffect(effectType) {
+    if (this.currentEffects.has(effectType)) return;
+    
+    this.currentEffects.add(effectType);
+    const duration = this.randomBetween(
+      this.durations[effectType].min,
+      this.durations[effectType].max
+    );
+    
+    switch (effectType) {
+      case 'petals':
+        this.startPetals(duration);
+        break;
+      case 'rain':
+        this.startRain(duration);
+        break;
+      case 'snow':
+        this.startSnow(duration);
+        break;
+      case 'moon':
+        this.startMoon(duration);
+        break;
+      case 'meteor':
+        this.startMeteor(duration);
+        break;
     }
     
-  } catch (error) {
-    console.error('动态背景初始化失败:', error);
+    // 设置效果结束定时器
+    const timeoutId = setTimeout(() => {
+      this.stopEffect(effectType);
+    }, duration);
+    
+    this.timeouts.set(effectType, timeoutId);
   }
+
+  startPetals(duration) {
+    this.petalsContainer.classList.add('active');
+    console.log('开始温和的花瓣效果');
+    
+    const createPetal = () => {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      petal.style.left = Math.random() * 100 + '%';
+      petal.style.animationDuration = (Math.random() * 3 + 4) + 's'; // 更慢的飘落速度
+      petal.style.animationDelay = Math.random() * 2 + 's';
+      
+      this.petalsContainer.appendChild(petal);
+      
+      setTimeout(() => {
+        if (petal.parentNode) {
+          petal.remove();
+        }
+      }, 8000);
+    };
+    
+    // 创建少量初始花瓣
+    for (let i = 0; i < 6; i++) {
+      setTimeout(createPetal, i * 300);
+    }
+    
+    // 更温和的持续生成频率
+    const intervalId = setInterval(createPetal, 1200); // 1.2秒生成一片花瓣
+    this.intervals.set('petals', intervalId);
+  }
+
+  startRain(duration) {
+    this.rainContainer.classList.add('active');
+    console.log('开始雨滴效果');
+    
+    const createRaindrop = () => {
+      const drop = document.createElement('div');
+      drop.className = 'raindrop';
+      drop.style.left = Math.random() * 100 + '%';
+      drop.style.animationDuration = (Math.random() * 0.3 + 0.8) + 's';
+      drop.style.animationDelay = Math.random() * 0.1 + 's';
+      
+      this.rainContainer.appendChild(drop);
+      
+      setTimeout(() => {
+        if (drop.parentNode) {
+          drop.remove();
+        }
+      }, 1500);
+    };
+    
+    // 立即创建密集雨滴
+    for (let i = 0; i < 20; i++) {
+      setTimeout(createRaindrop, i * 20);
+    }
+    
+    // 密集的雨滴
+    const intervalId = setInterval(createRaindrop, 60);
+    this.intervals.set('rain', intervalId);
+  }
+
+  startSnow(duration) {
+    this.snowContainer.classList.add('active');
+    console.log('开始雪花效果');
+    
+    const snowflakes = ['❄', '❅', '❆', '❋', '❊'];
+    const createSnowflake = () => {
+      const flake = document.createElement('div');
+      flake.className = 'snowflake';
+      flake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+      flake.style.left = Math.random() * 100 + '%';
+      flake.style.animationDuration = (Math.random() * 3 + 4) + 's';
+      flake.style.animationDelay = Math.random() * 1 + 's';
+      
+      this.snowContainer.appendChild(flake);
+      
+      setTimeout(() => {
+        if (flake.parentNode) {
+          flake.remove();
+        }
+      }, 8000);
+    };
+    
+    // 立即创建初始雪花
+    for (let i = 0; i < 10; i++) {
+      setTimeout(createSnowflake, i * 150);
+    }
+    
+    const intervalId = setInterval(createSnowflake, 600);
+    this.intervals.set('snow', intervalId);
+  }
+
+  // 启动星光效果
+  startStarfield() {
+    console.log('启动常驻星光系统');
+    
+    // 初始创建星星
+    this.createInitialStars();
+    
+    // 定期添加和移除星星
+    const starUpdateInterval = setInterval(() => {
+      this.updateStarfield();
+    }, 2000); // 每2秒更新一次星空
+    
+    this.intervals.set('starfield', starUpdateInterval);
+  }
+
+  // 创建初始星星
+  createInitialStars() {
+    const initialStarCount = Math.floor(this.maxStars * 0.7); // 初始70%的星星
+    
+    for (let i = 0; i < initialStarCount; i++) {
+      setTimeout(() => {
+        this.createStar();
+      }, i * 50); // 分批创建，避免一次性生成太多
+    }
+  }
+
+  // 创建单个星星
+  createStar() {
+    if (this.stars.length >= this.maxStars) return;
+    
+    const star = document.createElement('div');
+    star.className = 'star';
+    
+    // 随机位置
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    
+    // 随机大小和样式
+    const sizeClass = this.getRandomStarSize();
+    star.classList.add(sizeClass);
+    
+    // 随机动画时长和延迟
+    const animationDuration = Math.random() * 4 + 3; // 3-7秒
+    const animationDelay = Math.random() * 2; // 0-2秒延迟
+    
+    // 随机选择动画类型
+    const animations = ['starTwinkle', 'starTwinkleSlow', 'starTwinkleFast'];
+    const animation = animations[Math.floor(Math.random() * animations.length)];
+    
+    star.style.animation = `${animation} ${animationDuration}s ease-in-out ${animationDelay}s infinite`;
+    
+    // 少数星星添加十字效果
+    if (Math.random() < 0.15) {
+      star.classList.add('cross-star');
+    }
+    
+    this.starfield.appendChild(star);
+    this.stars.push(star);
+    
+    return star;
+  }
+
+  // 获取随机星星大小
+  getRandomStarSize() {
+    const sizes = ['size-1', 'size-2', 'size-3', 'size-4', 'size-5'];
+    const weights = [30, 25, 20, 15, 10]; // 小星星更常见
+    
+    const random = Math.random() * 100;
+    let cumulative = 0;
+    
+    for (let i = 0; i < sizes.length; i++) {
+      cumulative += weights[i];
+      if (random <= cumulative) {
+        return sizes[i];
+      }
+    }
+    
+    return sizes[0]; // 默认返回最小尺寸
+  }
+
+  // 更新星空
+  updateStarfield() {
+    if (!this.isActive) return;
+    
+    // 随机移除一些星星
+    if (this.stars.length > 0 && Math.random() < 0.3) {
+      this.removeStar();
+    }
+    
+    // 随机添加新星星
+    if (this.stars.length < this.maxStars && Math.random() < 0.6) {
+      this.createStar();
+    }
+    
+    // 偶尔创建一批新星星（模拟星云效果）
+    if (Math.random() < 0.05) {
+      const newStarCount = Math.floor(Math.random() * 5) + 2;
+      for (let i = 0; i < newStarCount; i++) {
+        if (this.stars.length < this.maxStars) {
+          setTimeout(() => this.createStar(), i * 200);
+        }
+      }
+    }
+  }
+
+  // 移除星星
+  removeStar() {
+    if (this.stars.length === 0) return;
+    
+    const randomIndex = Math.floor(Math.random() * this.stars.length);
+    const star = this.stars[randomIndex];
+    
+    // 淡出效果
+    star.style.transition = 'opacity 1s ease-out';
+    star.style.opacity = '0';
+    
+    setTimeout(() => {
+      if (star.parentNode) {
+        star.remove();
+      }
+      // 从数组中移除
+      const index = this.stars.indexOf(star);
+      if (index > -1) {
+        this.stars.splice(index, 1);
+      }
+    }, 1000);
+  }
+
+  stopEffect(effectType) {
+    this.currentEffects.delete(effectType);
+    
+    // 清除对应的间隔定时器
+    if (this.intervals.has(effectType)) {
+      clearInterval(this.intervals.get(effectType));
+      this.intervals.delete(effectType);
+    }
+    
+    // 清除对应的超时定时器
+    if (this.timeouts.has(effectType)) {
+      clearTimeout(this.timeouts.get(effectType));
+      this.timeouts.delete(effectType);
+    }
+    
+    // 隐藏对应的容器
+    switch (effectType) {
+      case 'petals':
+        this.petalsContainer.classList.remove('active');
+        break;
+      case 'rain':
+        this.rainContainer.classList.remove('active');
+        break;
+      case 'snow':
+        this.snowContainer.classList.remove('active');
+        break;
+    }
+  }
+
+  // 停止星光效果
+  stopStarfield() {
+    console.log('停止星光系统');
+    
+    // 清除星光更新间隔
+    if (this.intervals.has('starfield')) {
+      clearInterval(this.intervals.get('starfield'));
+      this.intervals.delete('starfield');
+    }
+    
+    // 移除所有星星
+    this.stars.forEach(star => {
+      if (star.parentNode) {
+        star.remove();
+      }
+    });
+    this.stars = [];
+  }
+
+  clearAllEffects() {
+    for (const effect of this.currentEffects) {
+      this.stopEffect(effect);
+    }
+  }
+
+  clearAllTimers() {
+    // 清除所有间隔定时器
+    for (const [key, intervalId] of this.intervals) {
+      clearInterval(intervalId);
+    }
+    this.intervals.clear();
+    
+    // 清除所有超时定时器
+    for (const [key, timeoutId] of this.timeouts) {
+      clearTimeout(timeoutId);
+    }
+    this.timeouts.clear();
+  }
+
+  getCurrentTheme() {
+    return document.documentElement.classList.contains('theme--dark') ? 'dark' : 'light';
+  }
+
+  randomBetween(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  getStatus() {
+    return {
+      active: this.isActive,
+      currentEffects: Array.from(this.currentEffects),
+      theme: this.getCurrentTheme(),
+      activeTimers: {
+        intervals: this.intervals.size,
+        timeouts: this.timeouts.size
+      }
+    };
+  }
+
+  destroy() {
+    this.stop();
+    
+    // 移除所有效果容器
+    if (this.petalsContainer) this.petalsContainer.remove();
+    if (this.rainContainer) this.rainContainer.remove();
+    if (this.snowContainer) this.snowContainer.remove();
+    if (this.starfield) this.starfield.remove();
+  }
+}
+
+// 初始化动态背景管理器
+let dynamicBackgroundManager;
+
+// DOM加载完成后初始化
+document.addEventListener('DOMContentLoaded', () => {
+  dynamicBackgroundManager = new DynamicBackgroundManager();
+  
+  // 将管理器暴露到全局，方便调试和控制
+  window.dynamicBg = dynamicBackgroundManager;
+  
+  // 添加调试工具
+  window.testWeatherEffects = () => {
+    console.log('🌟 测试动态背景效果');
+    const manager = dynamicBackgroundManager.weatherManager;
+    
+    // 测试白天效果
+    console.log('🌸 测试花瓣效果');
+    manager.startEffect('petals');
+    
+    setTimeout(() => {
+      console.log('✨ 测试星光效果');
+      manager.startStarfield();
+    }, 5000);
+    
+    console.log('白天花瓣和夜晚星光效果将在5秒内展示');
+  };
+
+  // 单独测试星光的方法
+  window.testStarfield = () => {
+    console.log('✨ 测试星光效果');
+    dynamicBackgroundManager.weatherManager.startStarfield();
+  };
+  
+  console.log('动态背景系统已初始化');
+  console.log('💡 调试提示: 在控制台运行 testWeatherEffects() 可以立即测试所有效果');
 });
 
-// 导出管理器类
-if (typeof window !== 'undefined') {
-  window.DynamicBackgroundManager = DynamicBackgroundManager;
-} 
+// 页面卸载时清理
+window.addEventListener('beforeunload', () => {
+  if (dynamicBackgroundManager) {
+    dynamicBackgroundManager.destroy();
+  }
+}); 
