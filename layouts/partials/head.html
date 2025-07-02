@@ -212,14 +212,7 @@
       crossorigin="anonymous"
     ></script>
 
-    {{ $dynamicBackgroundFixJS := resources.Get "js/dynamic-background-fix.js" }}
-    {{ $secureDynamicBackgroundFixJS := $dynamicBackgroundFixJS | resources.Minify | resources.Fingerprint }}
-    <script
-      type="text/javascript"
-      src="{{ $secureDynamicBackgroundFixJS.RelPermalink }}"
-      integrity="{{ $secureDynamicBackgroundFixJS.Data.Integrity }}"
-      crossorigin="anonymous"
-    ></script>
+
   {{ end }}
 
   {{- $js := "" -}}

@@ -1,73 +1,6 @@
-// 语言切换器 - 保存用户语言偏好并在页面间保持一致
+// 语言切换器 - 简化版，只负责保存语言偏好，让Hugo处理路由
 
-// 立即执行的语言检查（在页面渲染前）
-(function() {
-  const getStoredLanguage = () => {
-    try {
-      return localStorage.getItem('language');
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const getCurrentLanguage = () => {
-    const path = window.location.pathname;
-    if (path.startsWith('/en/') || path === '/en') {
-      return 'en';
-    }
-    return 'zh'; // 默认中文
-  };
-
-  const getLanguageUrl = (targetLang) => {
-    const currentPath = window.location.pathname;
-    const currentLang = getCurrentLanguage();
-    
-    if (currentLang === targetLang) {
-      return currentPath; // 已经是目标语言
-    }
-    
-    if (targetLang === 'en') {
-      // 切换到英文
-      if (currentPath === '/' || currentPath === '') {
-        return '/en/';
-      }
-      // 确保路径以/开头
-      const normalizedPath = currentPath.startsWith('/') ? currentPath : '/' + currentPath;
-      return '/en' + normalizedPath;
-    } else {
-      // 切换到中文
-      if (currentPath.startsWith('/en/')) {
-        const pathWithoutEn = currentPath.substring(3);
-        return pathWithoutEn || '/';
-      } else if (currentPath === '/en') {
-        return '/';
-      }
-      return currentPath;
-    }
-  };
-
-  // 立即检查并重定向（如果需要）
-  const storedLang = getStoredLanguage();
-  const currentLang = getCurrentLanguage();
-  
-  // 调试信息（仅在开发模式下）
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('[Language Switcher] Stored language:', storedLang);
-    console.log('[Language Switcher] Current language:', currentLang);
-    console.log('[Language Switcher] Current path:', window.location.pathname);
-  }
-  
-  if (storedLang && storedLang !== currentLang) {
-    const targetUrl = getLanguageUrl(storedLang);
-    if (targetUrl !== window.location.pathname) {
-      // 立即重定向，不等待页面加载
-      window.location.replace(targetUrl);
-      return; // 阻止后续代码执行
-    }
-  }
-})();
-
-// 工具函数（用于后续的事件处理）
+// 工具函数
 const getStoredLanguage = () => {
   try {
     return localStorage.getItem('language');
@@ -94,6 +27,15 @@ const getCurrentLanguage = () => {
 
 // 初始化语言切换器
 document.addEventListener('DOMContentLoaded', () => {
+  // 调试信息（仅在开发模式下）
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    const storedLang = getStoredLanguage();
+    const currentLang = getCurrentLanguage();
+    console.log('[Language Switcher] Stored language:', storedLang);
+    console.log('[Language Switcher] Current language:', currentLang);
+    console.log('[Language Switcher] Current path:', window.location.pathname);
+  }
+
   // 为语言切换链接添加事件监听器
   const languageSwitcher = document.querySelector('#languagepicker');
   if (languageSwitcher) {
@@ -106,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         languageLinks.forEach(link => {
           link.addEventListener('click', (e) => {
-            e.preventDefault();
+            // 不阻止默认行为，让Hugo自己处理链接跳转
             
             const href = link.getAttribute('href');
             let targetLang = 'zh';
             
             // 根据链接URL判断目标语言
-            if (href.startsWith('/en/') || href === '/en') {
+            if (href && (href.startsWith('/en/') || href === '/en')) {
               targetLang = 'en';
             }
             
@@ -131,11 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
               console.log('[Language Switcher] Target URL:', href);
             }
             
-            // 保存语言偏好
+            // 只保存语言偏好，让Hugo处理跳转
             setStoredLanguage(targetLang);
-            
-            // 立即跳转到目标语言页面
-            window.location.replace(href);
           });
         });
       }

@@ -8,13 +8,271 @@
   --md-content-blur: 8px;
 }
 
-/* 针对MD文件页面的特殊优化 */
+/* 启用动态背景时，移除所有影响全局背景的边框和边距 */
 :root.dynamic-bg-enabled .post {
-  /* 确保文章容器有足够的对比度 */
+  margin: 0 !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 让主内容区域完全透明，依赖动态背景 */
+:root.dynamic-bg-enabled .wrapper__main {
+  background-color: transparent !important;
+}
+
+/* 保持侧边栏的分隔线，但让背景透明 */
+:root.dynamic-bg-enabled .sidebar {
+  background-color: transparent !important;
+}
+
+/* 桌面端保持侧边栏分隔线 */
+@media screen and (min-width: 961px) {
+  :root.dynamic-bg-enabled .theme--light .sidebar {
+    border-right: 1px solid rgba(70, 70, 70, 0.2) !important;
+    background-color: transparent !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .sidebar {
+    border-right: 1px solid rgba(238, 238, 238, 0.2) !important;
+    background-color: transparent !important;
+  }
+}
+
+/* === 标题栏优化 === */
+/* 去除标题栏边框，让背景透明 */
+:root.dynamic-bg-enabled .header {
+  background-color: transparent !important;
+  border-bottom: none !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 桌面端标题栏优化 */
+@media screen and (min-width: 961px) {
+  :root.dynamic-bg-enabled .header {
+    border-bottom: none !important;
+    background-color: transparent !important;
+  }
+}
+
+/* 导航栏背景透明化 */
+:root.dynamic-bg-enabled .nav__list {
+  background-color: transparent !important;
+}
+
+@media screen and (min-width: 961px) {
+  :root.dynamic-bg-enabled .nav__list {
+    background-color: transparent !important;
+  }
+}
+
+/* === 美化导航栏下划线 === */
+/* 重新设计激活状态的下划线 */
+:root.dynamic-bg-enabled .nav__link--active {
   position: relative;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-bottom: none !important;
+  padding-bottom: 24px;
+}
+
+/* 创建更美观的下划线效果 */
+:root.dynamic-bg-enabled .nav__link--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  animation: activeUnderline 1.5s ease-in-out;
+}
+
+/* 主题色适配 */
+:root.dynamic-bg-enabled .theme--light .nav__link--active::after {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(70, 70, 70, 0.8) 50%, 
+    transparent 100%);
+}
+
+:root.dynamic-bg-enabled .theme--dark .nav__link--active::after {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(238, 238, 238, 0.9) 50%, 
+    transparent 100%);
+}
+
+/* 悬停效果优化 */
+:root.dynamic-bg-enabled .nav__list-item:hover a {
+  position: relative;
   transition: all 0.3s ease;
+}
+
+:root.dynamic-bg-enabled .nav__list-item:hover a:not(.nav__link--active)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  border-radius: 1px;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+:root.dynamic-bg-enabled .theme--light .nav__list-item:hover a:not(.nav__link--active)::after {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(70, 70, 70, 0.4) 50%, 
+    transparent 100%);
+}
+
+:root.dynamic-bg-enabled .theme--dark .nav__list-item:hover a:not(.nav__link--active)::after {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(238, 238, 238, 0.5) 50%, 
+    transparent 100%);
+}
+
+/* 下划线动画 */
+@keyframes activeUnderline {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    width: 80%;
+    opacity: 1;
+  }
+}
+
+/* 移动端优化 */
+@media (max-width: 960px) {
+  :root.dynamic-bg-enabled .header {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  :root.dynamic-bg-enabled .nav__link--active::after {
+    width: 90%;
+    height: 2px;
+  }
+}
+
+/* 文章内容区域优化 - 添加轻微的内边距保持可读性 */
+:root.dynamic-bg-enabled .post__content {
+  padding: 2rem !important;
+  background-color: transparent !important;
+  /* 添加轻微的背景遮罩以提高可读性 */
+  position: relative;
+}
+
+:root.dynamic-bg-enabled .post__content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  border-radius: 8px;
+}
+
+:root.dynamic-bg-enabled .theme--light .post__content::before {
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content::before {
+  background-color: rgba(21, 32, 40, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 标题区域优化 */
+:root.dynamic-bg-enabled .post h1,
+:root.dynamic-bg-enabled .post h2,
+:root.dynamic-bg-enabled .post h3 {
+  background-color: transparent !important;
+  padding: 0.5rem 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 960px) {
+  :root.dynamic-bg-enabled .post__content {
+    padding: 1.5rem !important;
+  }
+  
+  :root.dynamic-bg-enabled .sidebar {
+    border-right: none !important;
+    border-bottom: 1px solid rgba(70, 70, 70, 0.2);
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .sidebar {
+    border-bottom: 1px solid rgba(238, 238, 238, 0.2);
+  }
+}
+
+/* 代码块保持轻微背景以区分 */
+:root.dynamic-bg-enabled .post__content pre {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content pre {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 引用块优化 */
+:root.dynamic-bg-enabled .post__content blockquote {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-left: 4px solid rgba(70, 70, 70, 0.3);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content blockquote {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left-color: rgba(238, 238, 238, 0.3);
+}
+
+/* 文章元信息区域 */
+:root.dynamic-bg-enabled .post__meta {
+  background-color: transparent !important;
+  padding: 1rem 2rem;
+}
+
+/* 确保链接在动态背景下仍然可见 */
+:root.dynamic-bg-enabled .theme--light .post__content a {
+  color: #2563eb !important;
+  text-decoration: underline;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content a {
+  color: #60a5fa !important;
+  text-decoration: underline;
+}
+
+/* 表格优化 */
+:root.dynamic-bg-enabled .post__content table {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 4px;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post__content table {
+  background-color: rgba(21, 32, 40, 0.8);
 }
 
 /* 白天模式MD页面优化 */
@@ -103,16 +361,6 @@
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: all 0.3s ease;
-}
-
-:root.dynamic-bg-enabled .theme--light .post__content a {
-  color: #0066cc;
-  border-bottom-color: rgba(0, 102, 204, 0.3);
-}
-
-:root.dynamic-bg-enabled .theme--dark .post__content a {
-  color: #66b3ff;
-  border-bottom-color: rgba(102, 179, 255, 0.3);
 }
 
 :root.dynamic-bg-enabled .post__content a:hover {
