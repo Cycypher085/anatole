@@ -123,42 +123,54 @@
   background: rgba(221, 160, 221, 0.8);
 }
 
-/* 特殊的十字星效果 */
-.star.cross-star::before,
-.star.cross-star::after {
-  content: '';
-  position: absolute;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(200, 200, 255, 0.7));
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
-  filter: blur(0.5px);
+/* 新的纯圆形星光效果 - 完全移除十字形状 */
+.star.glow-star {
+  /* 基础圆形星星，使用多层光晕 */
+  box-shadow: 
+    0 0 2px rgba(255, 255, 255, 1),
+    0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 6px rgba(255, 255, 255, 0.6),
+    0 0 8px rgba(255, 255, 255, 0.4);
 }
 
-.star.cross-star::before {
-  width: 12px;
-  height: 2px;
-  border-radius: 1px;
+.star.glow-star.size-1 {
+  box-shadow: 
+    0 0 1px rgba(255, 255, 255, 1),
+    0 0 2px rgba(255, 255, 255, 0.8),
+    0 0 3px rgba(255, 255, 255, 0.5);
 }
 
-.star.cross-star::after {
-  width: 2px;
-  height: 12px;
-  border-radius: 1px;
+.star.glow-star.size-2 {
+  box-shadow: 
+    0 0 2px rgba(255, 255, 255, 1),
+    0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 6px rgba(255, 255, 255, 0.6);
 }
 
-/* 大尺寸星星的十字效果模糊处理 */
-.star.size-4.cross-star::before,
-.star.size-4.cross-star::after {
-  filter: blur(1px);
-  opacity: 0.6;
+.star.glow-star.size-3 {
+  box-shadow: 
+    0 0 2px rgba(255, 255, 255, 1),
+    0 0 4px rgba(255, 255, 255, 0.8),
+    0 0 6px rgba(255, 255, 255, 0.6),
+    0 0 8px rgba(255, 255, 255, 0.4);
 }
 
-.star.size-5.cross-star::before,
-.star.size-5.cross-star::after {
-  filter: blur(1.5px);
-  opacity: 0.5;
+.star.glow-star.size-4 {
+  box-shadow: 
+    0 0 2px rgba(173, 216, 230, 1),
+    0 0 4px rgba(173, 216, 230, 0.8),
+    0 0 6px rgba(173, 216, 230, 0.6),
+    0 0 8px rgba(173, 216, 230, 0.4),
+    0 0 10px rgba(173, 216, 230, 0.2);
+}
+
+.star.glow-star.size-5 {
+  box-shadow: 
+    0 0 3px rgba(221, 160, 221, 1),
+    0 0 6px rgba(221, 160, 221, 0.8),
+    0 0 9px rgba(221, 160, 221, 0.6),
+    0 0 12px rgba(221, 160, 221, 0.4),
+    0 0 15px rgba(221, 160, 221, 0.2);
 }
 
 /* ================ 特殊效果元素 ================ */
@@ -670,10 +682,9 @@
     filter: brightness(1.2) saturate(1.1);
   }
   
-  .star.cross-star::before,
-  .star.cross-star::after {
-    opacity: 0.9;
-    filter: brightness(1.3);
+  /* 移动端星光光晕增强 */
+  .star.glow-star {
+    filter: brightness(1.3) saturate(1.2);
   }
   
   /* 移动端减少模糊效果，避免顶部模糊块 */
@@ -746,9 +757,13 @@
     box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
   }
   
-  .star.cross-star::before,
-  .star.cross-star::after {
-    box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  /* 高分辨率下的光晕星星优化 */
+  .star.glow-star {
+    box-shadow: 
+      0 0 1px rgba(255, 255, 255, 1),
+      0 0 3px rgba(255, 255, 255, 0.9),
+      0 0 5px rgba(255, 255, 255, 0.7),
+      0 0 7px rgba(255, 255, 255, 0.5);
   }
 }
 

@@ -733,10 +733,8 @@ class WeatherEffectManager {
     
     star.style.animation = `${animation} ${animationDuration}s ease-in-out ${animationDelay}s infinite`;
     
-    // 少数星星添加十字效果
-    if (Math.random() < 0.15) {
-      star.classList.add('cross-star');
-    }
+    // 所有星星都添加光晕效果
+    star.classList.add('glow-star');
     
     this.starfield.appendChild(star);
     this.stars.push(star);
