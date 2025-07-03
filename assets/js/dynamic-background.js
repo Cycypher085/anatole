@@ -26,10 +26,19 @@ class DynamicBackgroundManager {
     this.backgroundElement = document.createElement('div');
     this.backgroundElement.className = 'dynamic-background';
     
+    // 设置为全局固定位置，不受页面切换影响
+    this.backgroundElement.style.position = 'fixed';
+    this.backgroundElement.style.top = '0';
+    this.backgroundElement.style.left = '0';
+    this.backgroundElement.style.width = '100vw';
+    this.backgroundElement.style.height = '100vh';
+    this.backgroundElement.style.zIndex = '-999';
+    this.backgroundElement.style.pointerEvents = 'none';
+    
     // 插入到body的第一个子元素之前
     document.body.insertBefore(this.backgroundElement, document.body.firstChild);
     
-    console.log('动态背景元素已创建');
+    console.log('动态背景元素已创建 - 全局固定模式');
   }
 
   initWeatherManager() {
@@ -60,6 +69,16 @@ class DynamicBackgroundManager {
     // 监听页面可见性变化（性能优化）
     document.addEventListener('visibilitychange', () => {
       this.handleVisibilityChange();
+    });
+
+    // 监听页面切换和语言切换，确保动态背景不受影响
+    document.addEventListener('beforeunload', () => {
+      this.handlePageTransition();
+    });
+    
+    // 监听页面加载完成
+    window.addEventListener('load', () => {
+      this.handlePageLoaded();
     });
   }
 
@@ -117,6 +136,28 @@ class DynamicBackgroundManager {
           this.weatherManager.resume();
         }
       }
+    }
+  }
+
+  handlePageTransition() {
+    // 页面切换时保持动态背景运行
+    if (this.backgroundElement && this.isEnabled) {
+      console.log('页面切换中，保持动态背景运行');
+      // 确保动态背景不会被重置
+      this.backgroundElement.style.position = 'fixed';
+      this.backgroundElement.style.zIndex = '-999';
+      this.backgroundElement.style.transition = 'none';
+    }
+  }
+
+  handlePageLoaded() {
+    // 页面加载完成后确保动态背景正常运行
+    if (this.backgroundElement && this.isEnabled) {
+      console.log('页面加载完成，恢复动态背景');
+      // 恢复过渡效果
+      setTimeout(() => {
+        this.backgroundElement.style.transition = '';
+      }, 100);
     }
   }
 
@@ -184,8 +225,44 @@ class DynamicBackgroundManager {
       prefersHighContrast: window.matchMedia('(prefers-contrast: high)').matches,
       supportedComponents: this.getSupportedComponents(),
       currentTheme: this.getCurrentTheme(),
-      weatherEffects: this.weatherManager ? this.weatherManager.getStatus() : null
+      weatherEffects: this.weatherManager ? this.weatherManager.getStatus() : null,
+      isMobile: window.innerWidth <= 768
     };
+  }
+
+  // 测试所有优化效果
+  testAllOptimizations() {
+    console.log('=== 动态背景优化测试 ===');
+    console.log('当前状态：', this.getStatus());
+    
+    // 测试花瓣效果
+    if (this.weatherManager) {
+      this.weatherManager.startEffect('petals');
+      console.log('✓ 漂浮花瓣效果已启动');
+    }
+    
+    // 测试星光效果
+    if (this.getCurrentTheme() === 'dark' && this.weatherManager) {
+      this.weatherManager.startEffect('starfield');
+      console.log('✓ 星光效果已启动');
+    }
+    
+    // 测试页面切换效果
+    const testPageTransition = () => {
+      document.body.classList.add('page-transitioning');
+      setTimeout(() => {
+        document.body.classList.remove('page-transitioning');
+        document.body.classList.add('page-transition-in');
+        setTimeout(() => {
+          document.body.classList.remove('page-transition-in');
+        }, 400);
+      }, 300);
+    };
+    
+    setTimeout(testPageTransition, 2000);
+    console.log('✓ 2秒后将测试页面切换效果');
+    
+    console.log('=== 测试完成 ===');
   }
 
   // 获取当前主题
@@ -479,31 +556,68 @@ class WeatherEffectManager {
 
   startPetals(duration) {
     this.petalsContainer.classList.add('active');
-    console.log('开始温和的花瓣效果');
+    console.log('开始随机漂浮花瓣效果');
     
-    const createPetal = () => {
+    const createFloatingPetal = () => {
       const petal = document.createElement('div');
-      petal.className = 'petal';
+      petal.className = 'petal floating-petal';
+      
+      // 随机位置生成
       petal.style.left = Math.random() * 100 + '%';
-      petal.style.animationDuration = (Math.random() * 3 + 4) + 's'; // 更慢的飘落速度
-      petal.style.animationDelay = Math.random() * 2 + 's';
+      petal.style.top = Math.random() * 100 + '%';
+      
+      // 随机运动参数
+      const floatDuration = Math.random() * 8 + 10; // 10-18秒的生命周期
+      const moveDistance = Math.random() * 80 + 40; // 40-120px的移动距离
+      const rotateAngle = Math.random() * 360; // 随机旋转角度
+      
+      // 随机运动方向
+      const direction = Math.random() * 2 * Math.PI;
+      const moveX = Math.cos(direction) * moveDistance;
+      const moveY = Math.sin(direction) * moveDistance;
+      
+      // 设置CSS自定义属性
+      petal.style.setProperty('--move-x', moveX + 'px');
+      petal.style.setProperty('--move-y', moveY + 'px');
+      petal.style.setProperty('--rotate-angle', rotateAngle + 'deg');
+      petal.style.setProperty('--float-duration', floatDuration + 's');
+      
+      // 应用随机运动动画和渐显效果
+      petal.style.animation = `floatingPetal ${floatDuration}s ease-in-out infinite, petalFadeIn 2s ease-out`;
+      
+      // 初始状态为模糊和透明
+      petal.style.filter = 'blur(3px)';
+      petal.style.opacity = '0';
       
       this.petalsContainer.appendChild(petal);
       
+      // 渐变到清晰状态
+      setTimeout(() => {
+        petal.style.transition = 'filter 2s ease-out, opacity 2s ease-out';
+        petal.style.filter = 'blur(0px)';
+        petal.style.opacity = '1';
+      }, 100);
+      
+      // 花瓣生命周期结束后移除
       setTimeout(() => {
         if (petal.parentNode) {
-          petal.remove();
+          petal.style.animation = `floatingPetal ${floatDuration}s ease-in-out infinite, petalFadeOut 2s ease-in-out forwards`;
+          setTimeout(() => {
+            if (petal.parentNode) {
+              petal.remove();
+            }
+          }, 2000);
         }
-      }, 8000);
+      }, floatDuration * 1000);
     };
     
-    // 创建少量初始花瓣
-    for (let i = 0; i < 6; i++) {
-      setTimeout(createPetal, i * 300);
+    // 创建初始花瓣
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => createFloatingPetal(), i * 500);
     }
     
-    // 更温和的持续生成频率
-    const intervalId = setInterval(createPetal, 1200); // 1.2秒生成一片花瓣
+    // 持续生成新花瓣
+    const intervalId = setInterval(createFloatingPetal, 2000); // 2秒生成一片花瓣
     this.intervals.set('petals', intervalId);
   }
 
@@ -828,8 +942,22 @@ document.addEventListener('DOMContentLoaded', () => {
     dynamicBackgroundManager.weatherManager.startStarfield();
   };
   
+  // 测试所有优化效果
+  window.testAllOptimizations = () => {
+    if (dynamicBackgroundManager) {
+      dynamicBackgroundManager.testAllOptimizations();
+    }
+  };
+  
+  // 移动端特殊处理
+  if (window.innerWidth <= 768) {
+    console.log('移动端模式：启用增强效果');
+    document.body.classList.add('mobile-enhanced');
+  }
+  
   console.log('动态背景系统已初始化');
   console.log('💡 调试提示: 在控制台运行 testWeatherEffects() 可以立即测试所有效果');
+  console.log('💡 调试提示: 在控制台运行 testAllOptimizations() 可以测试所有优化效果');
 });
 
 // 页面卸载时清理

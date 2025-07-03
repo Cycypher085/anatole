@@ -48,7 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
         
         languageLinks.forEach(link => {
           link.addEventListener('click', (e) => {
-            // 不阻止默认行为，让Hugo自己处理链接跳转
+            // 添加平滑过渡效果
+            const wrapper = document.querySelector('.wrapper__main');
+            if (wrapper) {
+              // 添加过渡类
+              document.body.classList.add('language-transitioning');
+              wrapper.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
+              wrapper.style.opacity = '0.8';
+              wrapper.style.transform = 'scale(0.98)';
+              
+              // 短暂延迟后恢复，确保过渡效果可见
+              setTimeout(() => {
+                wrapper.style.opacity = '1';
+                wrapper.style.transform = 'scale(1)';
+                setTimeout(() => {
+                  document.body.classList.remove('language-transitioning');
+                }, 400);
+              }, 200);
+            }
             
             const href = link.getAttribute('href');
             let targetLang = 'zh';

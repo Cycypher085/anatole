@@ -128,20 +128,37 @@
 .star.cross-star::after {
   content: '';
   position: absolute;
-  background: inherit;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(200, 200, 255, 0.7));
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  opacity: 0.8;
+  filter: blur(0.5px);
 }
 
 .star.cross-star::before {
-  width: 8px;
-  height: 1px;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
 }
 
 .star.cross-star::after {
-  width: 1px;
-  height: 8px;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+}
+
+/* 大尺寸星星的十字效果模糊处理 */
+.star.size-4.cross-star::before,
+.star.size-4.cross-star::after {
+  filter: blur(1px);
+  opacity: 0.6;
+}
+
+.star.size-5.cross-star::before,
+.star.size-5.cross-star::after {
+  filter: blur(1.5px);
+  opacity: 0.5;
 }
 
 /* ================ 特殊效果元素 ================ */
@@ -379,6 +396,71 @@
   }
 }
 
+/* 新的漂浮花瓣动画 */
+@keyframes floatingPetal {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.6;
+  }
+  10% {
+    opacity: 1;
+  }
+  25% {
+    transform: translate(calc(var(--move-x) * 0.3), calc(var(--move-y) * 0.2)) rotate(calc(var(--rotate-angle) * 0.25));
+  }
+  50% {
+    transform: translate(calc(var(--move-x) * 0.7), calc(var(--move-y) * 0.6)) rotate(calc(var(--rotate-angle) * 0.5));
+  }
+  75% {
+    transform: translate(calc(var(--move-x) * 0.9), calc(var(--move-y) * 0.8)) rotate(calc(var(--rotate-angle) * 0.75));
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--move-x), var(--move-y)) rotate(var(--rotate-angle));
+    opacity: 0.6;
+  }
+}
+
+/* 花瓣渐显动画 */
+@keyframes petalFadeIn {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    filter: blur(2px);
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+/* 花瓣淡出动画 */
+@keyframes petalFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* 漂浮花瓣样式 */
+.floating-petal {
+  position: absolute !important;
+  animation-timing-function: ease-in-out !important;
+  will-change: transform, opacity;
+}
+
 /* 保留空白 - 月亮和流星动画已移除 */
 
 /* 当启用动态背景时，让部分背景变为半透明以显示效果 */
@@ -565,18 +647,70 @@
     animation-duration: 30s;
   }
   
+  /* 移动端动态背景增强 */
+  .theme--light .dynamic-background {
+    background-size: 300% 300% !important;
+    opacity: 0.9;
+    filter: brightness(1.1) saturate(1.2);
+  }
+  
+  .theme--dark .dynamic-background {
+    background-size: 300% 300% !important;
+    opacity: 0.95;
+    filter: brightness(1.15) saturate(1.3) hue-rotate(5deg);
+  }
+  
   /* 移动端星光效果优化 */
   .starfield {
-    opacity: 0.9;
+    opacity: 0.95;
   }
   
   .star {
-    transform: scale(0.9);
+    transform: scale(1.1);
+    filter: brightness(1.2) saturate(1.1);
   }
   
   .star.cross-star::before,
   .star.cross-star::after {
-    opacity: 0.8;
+    opacity: 0.9;
+    filter: brightness(1.3);
+  }
+  
+  /* 移动端减少模糊效果，避免顶部模糊块 */
+  :root.dynamic-bg-enabled .theme--light .wrapper__main,
+  :root.dynamic-bg-enabled .theme--dark .wrapper__main {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--light .header,
+  :root.dynamic-bg-enabled .theme--dark .header {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--light .post__content,
+  :root.dynamic-bg-enabled .theme--dark .post__content {
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
+  
+  :root.dynamic-bg-enabled .theme--dark .post__content {
+    background-color: rgba(25, 20, 35, 0.9) !important;
+  }
+  
+  /* 移动端标题区域优化 */
+  :root.dynamic-bg-enabled .theme--light .post h1,
+  :root.dynamic-bg-enabled .theme--light .post h2,
+  :root.dynamic-bg-enabled .theme--dark .post h1,
+  :root.dynamic-bg-enabled .theme--dark .post h2 {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    margin-top: 0 !important;
+    padding-top: 8px !important;
   }
 }
 
@@ -742,8 +876,44 @@ body {
   transition: background-color 0.6s ease, color 0.4s ease;
 }
 
+/* 页面内容切换动画 - 确保动态背景不受影响 */
+.wrapper__main {
+  transition: opacity 0.5s ease, transform 0.4s ease;
+}
+
+/* 页面切换时的淡入淡出效果 */
+@keyframes pageContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageContentFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* 页面切换过程中的类 */
+.page-transitioning .wrapper__main {
+  animation: pageContentFadeOut 0.3s ease forwards;
+}
+
+.page-transition-in .wrapper__main {
+  animation: pageContentFadeIn 0.4s ease forwards;
+}
+
 /* 主要内容区域过渡 */
-.wrapper__main,
 .post,
 .post__content,
 .sidebar,
@@ -864,6 +1034,19 @@ table {
 
 .theme-transitioning .sidebar {
   transition: all 0.6s ease;
+}
+
+/* 语言切换时的过渡效果 */
+.language-transitioning {
+  transition: all 0.4s ease;
+}
+
+.language-transitioning .wrapper__main {
+  transition: opacity 0.4s ease, transform 0.3s ease !important;
+}
+
+.language-transitioning .dynamic-background {
+  transition: none !important;
 }
 
 /* 页面加载时的渐入效果 */
@@ -1039,4 +1222,74 @@ select:focus {
     transform: scale(0.98);
     transition: transform 0.1s ease;
   }
+}
+
+/* ================ 删除不必要的边框和突出效果 ================ */
+
+/* 删除作品集周围的边框 */
+.portfolio::before {
+  border: none !important;
+}
+
+/* 删除作品集描述区域的底部边框 */
+.portfolio__description--left,
+.portfolio__description--right {
+  border-bottom: none !important;
+}
+
+.theme--light .portfolio__description--left,
+.theme--light .portfolio__description--right,
+.theme--dark .portfolio__description--left,
+.theme--dark .portfolio__description--right {
+  border-bottom: none !important;
+}
+
+/* 删除文章页脚的底部边框 (关于、联系页面的文字后边框) */
+.post__footer {
+  border-bottom: none !important;
+}
+
+.theme--light .post__footer,
+.theme--dark .post__footer {
+  border-bottom: none !important;
+}
+
+/* 确保动态背景模式下也没有边框 */
+:root.dynamic-bg-enabled .portfolio::before {
+  border: none !important;
+}
+
+:root.dynamic-bg-enabled .portfolio__description--left,
+:root.dynamic-bg-enabled .portfolio__description--right {
+  border-bottom: none !important;
+}
+
+:root.dynamic-bg-enabled .post__footer {
+  border-bottom: none !important;
+}
+
+:root.dynamic-bg-enabled .theme--light .post__footer,
+:root.dynamic-bg-enabled .theme--dark .post__footer {
+  border-bottom: none !important;
+}
+
+/* 删除非链接内容的突出效果 - 覆盖之前的悬停效果 */
+.post:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+.portfolio__description:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+:root.dynamic-bg-enabled .post:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
+}
+
+:root.dynamic-bg-enabled .theme--dark .post:hover {
+  transform: none !important;
+  box-shadow: inherit !important;
 } 
