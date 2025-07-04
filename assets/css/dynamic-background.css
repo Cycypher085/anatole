@@ -746,8 +746,8 @@
   
   :root.dynamic-bg-enabled .theme--light .header,
   :root.dynamic-bg-enabled .theme--dark .header {
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     margin-top: 0 !important;
     padding-top: 8px !important;
   }
