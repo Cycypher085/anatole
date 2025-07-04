@@ -780,7 +780,7 @@
   }
   
   .portfolio__title {
-    margin-top: 20px !important;
+    margin-top: 80px !important;
     padding-top: 10px !important;
   }
   
@@ -799,6 +799,12 @@
   :root.dynamic-bg-enabled .theme--dark .portfolio__description {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+  
+  /* 手机端Portfolio页面的标题向下移动 */
+  .portfolio .post h1,
+  .portfolio .post h2 {
+    margin-top: 60px !important;
   }
 }
 
