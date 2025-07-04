@@ -383,26 +383,16 @@ class WeatherEffectManager {
   }
 
   createEffectContainers() {
-    // 花瓣容器
-    this.petalsContainer = document.createElement('div');
-    this.petalsContainer.className = 'weather-petals';
-    
-    // 雨滴容器
-    this.rainContainer = document.createElement('div');
-    this.rainContainer.className = 'weather-rain';
-    
-    // 雪花容器
-    this.snowContainer = document.createElement('div');
-    this.snowContainer.className = 'weather-snow';
+    // 气泡容器
+    this.bubblesContainer = document.createElement('div');
+    this.bubblesContainer.className = 'bubblefield';
     
     // 星光容器
     this.starfield = document.createElement('div');
     this.starfield.className = 'starfield';
     
     // 添加到主容器
-    this.container.appendChild(this.petalsContainer);
-    this.container.appendChild(this.rainContainer);
-    this.container.appendChild(this.snowContainer);
+    this.container.appendChild(this.bubblesContainer);
     this.container.appendChild(this.starfield);
   }
 
@@ -424,9 +414,9 @@ class WeatherEffectManager {
     const theme = this.getCurrentTheme();
     
     if (theme === 'light') {
-      // 白天模式立即显示温和的花瓣效果
-      console.log('启动白天模式温和花瓣效果');
-      this.startEffect('petals');
+      // 白天模式立即显示气泡效果
+      console.log('启动白天模式气泡效果');
+      this.startBubbles();
     } else {
       // 夜晚模式启动星光
       console.log('启动夜晚模式常驻星光');
@@ -463,8 +453,8 @@ class WeatherEffectManager {
       setTimeout(() => {
         const theme = this.getCurrentTheme();
         if (theme === 'light') {
-          // 白天模式恢复随机效果调度
-          this.scheduleNextEffect();
+          // 白天模式启动气泡效果
+          this.startBubbles();
         } else {
           // 夜晚模式启动星光
           this.startStarfield();
@@ -483,19 +473,8 @@ class WeatherEffectManager {
     
     const theme = this.getCurrentTheme();
     
-    // 只有白天模式才需要调度随机效果
-    if (theme === 'light') {
-      const interval = this.triggerIntervals[theme];
-      const nextDelay = this.randomBetween(interval.min, interval.max);
-      
-      const timeoutId = setTimeout(() => {
-        this.triggerRandomEffect();
-        this.scheduleNextEffect(); // 递归调度下一个效果
-      }, nextDelay);
-      
-      this.timeouts.set('nextEffect', timeoutId);
-    }
-    // 夜晚模式不需要调度，星光是常驻的
+    // 气泡和星光都是常驻效果，不需要定时调度
+    // 已经在triggerImmediateEffect中处理了
   }
 
   triggerRandomEffect() {
@@ -503,122 +482,134 @@ class WeatherEffectManager {
     
     const theme = this.getCurrentTheme();
     
-    // 只有白天模式才触发随机效果，夜晚模式只有常驻星光
-    if (theme === 'light') {
-      // 白天模式只有花瓣效果
-      const availableEffects = ['petals'];
-      
-      // 避免同时触发太多效果
-      if (this.currentEffects.size >= 1) {
-        return;
-      }
-      
-      const effect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
-      this.startEffect(effect);
-    }
-    // 夜晚模式不触发随机效果，星光是常驻的
+    // 气泡和星光都是常驻效果，不需要随机触发
+    // 已经在triggerImmediateEffect中处理了
   }
 
   startEffect(effectType) {
-    if (this.currentEffects.has(effectType)) return;
-    
-    this.currentEffects.add(effectType);
-    const duration = this.randomBetween(
-      this.durations[effectType].min,
-      this.durations[effectType].max
-    );
-    
-    switch (effectType) {
-      case 'petals':
-        this.startPetals(duration);
-        break;
-      case 'rain':
-        this.startRain(duration);
-        break;
-      case 'snow':
-        this.startSnow(duration);
-        break;
-      case 'moon':
-        this.startMoon(duration);
-        break;
-      case 'meteor':
-        this.startMeteor(duration);
-        break;
-    }
-    
-    // 设置效果结束定时器
-    const timeoutId = setTimeout(() => {
-      this.stopEffect(effectType);
-    }, duration);
-    
-    this.timeouts.set(effectType, timeoutId);
+    // 新的效果管理不需要这个方法了，气泡和星光都是常驻效果
+    // 使用 startBubbles() 和 startStarfield() 直接管理
   }
 
-  startPetals(duration) {
-    this.petalsContainer.classList.add('active');
-    console.log('开始随机漂浮花瓣效果');
+  startBubbles() {
+    this.bubblesContainer.classList.add('active');
+    console.log('开始白天气泡效果');
     
-    const createFloatingPetal = () => {
-      const petal = document.createElement('div');
-      petal.className = 'petal floating-petal';
-      
-      // 随机位置生成
-      petal.style.left = Math.random() * 100 + '%';
-      petal.style.top = Math.random() * 100 + '%';
-      
-      // 随机运动参数
-      const floatDuration = Math.random() * 8 + 10; // 10-18秒的生命周期
-      const moveDistance = Math.random() * 80 + 40; // 40-120px的移动距离
-      const rotateAngle = Math.random() * 360; // 随机旋转角度
-      
-      // 随机运动方向
-      const direction = Math.random() * 2 * Math.PI;
-      const moveX = Math.cos(direction) * moveDistance;
-      const moveY = Math.sin(direction) * moveDistance;
-      
-      // 设置CSS自定义属性
-      petal.style.setProperty('--move-x', moveX + 'px');
-      petal.style.setProperty('--move-y', moveY + 'px');
-      petal.style.setProperty('--rotate-angle', rotateAngle + 'deg');
-      petal.style.setProperty('--float-duration', floatDuration + 's');
-      
-      // 应用随机运动动画和渐显效果
-      petal.style.animation = `floatingPetal ${floatDuration}s ease-in-out infinite, petalFadeIn 2s ease-out`;
-      
-      // 初始状态为模糊和透明
-      petal.style.filter = 'blur(3px)';
-      petal.style.opacity = '0';
-      
-      this.petalsContainer.appendChild(petal);
-      
-      // 渐变到清晰状态
-      setTimeout(() => {
-        petal.style.transition = 'filter 2s ease-out, opacity 2s ease-out';
-        petal.style.filter = 'blur(0px)';
-        petal.style.opacity = '1';
-      }, 100);
-      
-      // 花瓣生命周期结束后移除
-      setTimeout(() => {
-        if (petal.parentNode) {
-          petal.style.animation = `floatingPetal ${floatDuration}s ease-in-out infinite, petalFadeOut 2s ease-in-out forwards`;
-          setTimeout(() => {
-            if (petal.parentNode) {
-              petal.remove();
-            }
-          }, 2000);
-        }
-      }, floatDuration * 1000);
-    };
+    // 创建初始气泡（类似星星的密度）
+    this.createInitialBubbles();
     
-    // 创建初始花瓣
-    for (let i = 0; i < 8; i++) {
-      setTimeout(() => createFloatingPetal(), i * 500);
+    // 定期评估气泡场（使用更慢的更新频率）
+    const intervalId = setInterval(() => {
+      this.updateBubblefield();
+    }, 4000);
+    this.intervals.set('bubbles', intervalId);
+  }
+
+  createInitialBubbles() {
+    // 根据屏幕尺寸确定气泡数量
+    const maxBubbles = this.getCurrentTheme() === 'light' ? 
+      Math.floor(Math.random() * 30) + 40 : 0; // 40-70个初始气泡
+    
+    for (let i = 0; i < maxBubbles; i++) {
+      setTimeout(() => {
+        this.createBubble();
+      }, i * 200 + Math.random() * 2000); // 更均匀分布的创建时间
+    }
+  }
+
+  createBubble() {
+    const bubble = document.createElement('div');
+    const sizeClass = this.getRandomBubbleSize();
+    const colorType = Math.random() < 0.6 ? 'bubble-orange' : 'bubble-pink';
+    const glowType = Math.random() < 0.15 ? 'glow-bubble' : '';
+    
+    bubble.className = `bubble size-${sizeClass} ${colorType} ${glowType}`.trim();
+    
+    // 随机位置
+    bubble.style.left = Math.random() * 100 + '%';
+    bubble.style.top = Math.random() * 100 + '%';
+    
+    // 初始状态为不可见
+    bubble.style.opacity = '0';
+    bubble.style.transform = 'scale(0.3)';
+    
+    // 随机动画
+    const animations = ['bubbleFloat', 'bubbleTwinkle', 'bubbleTwinkleSlow', 'bubbleTwinkleFast'];
+    const animationType = animations[Math.floor(Math.random() * animations.length)];
+    const animationDuration = this.randomBetween(5, 15) + 's';
+    const animationDelay = Math.random() * 3 + 's';
+    
+    bubble.style.animation = `${animationType} ${animationDuration} ease-in-out infinite ${animationDelay}`;
+    
+    this.bubblesContainer.appendChild(bubble);
+    
+    // 渐入效果
+    setTimeout(() => {
+      bubble.style.transition = 'opacity 2s ease-in-out, transform 2s ease-in-out';
+      bubble.style.opacity = (Math.random() * 0.6 + 0.3).toFixed(2);
+      bubble.style.transform = 'scale(1)';
+    }, 100);
+    
+    return bubble;
+  }
+
+  getRandomBubbleSize() {
+    const rand = Math.random();
+    if (rand < 0.4) return 1;      // 40%小气泡
+    if (rand < 0.65) return 2;     // 25%中小气泡
+    if (rand < 0.8) return 3;      // 15%中等气泡
+    if (rand < 0.92) return 4;     // 12%较大气泡
+    return 5;                      // 8%大气泡
+  }
+
+  updateBubblefield() {
+    const currentBubbles = this.bubblesContainer.querySelectorAll('.bubble');
+    const currentTheme = this.getCurrentTheme();
+    
+    // 只在白天模式下管理气泡
+    if (currentTheme !== 'light') {
+      return;
     }
     
-    // 持续生成新花瓣
-    const intervalId = setInterval(createFloatingPetal, 2000); // 2秒生成一片花瓣
-    this.intervals.set('petals', intervalId);
+    // 随机移除一些气泡（降低移除概率）
+    if (Math.random() < 0.1) { // 10%概率移除气泡，更温和
+      this.removeBubble();
+    }
+    
+    // 随机创建新气泡（降低创建概率）
+    if (Math.random() < 0.4) { // 40%概率创建新气泡，更温和
+      this.createBubble();
+    }
+    
+    // 创建气泡群效果（5%概率）
+    if (Math.random() < 0.05) {
+      const groupCount = Math.floor(Math.random() * 5) + 3; // 3-7个气泡
+      for (let i = 0; i < groupCount; i++) {
+        setTimeout(() => {
+          if (Math.random() < 0.8) {
+            this.createBubble();
+          }
+        }, i * 200);
+      }
+    }
+  }
+
+  removeBubble() {
+    const bubbles = this.bubblesContainer.querySelectorAll('.bubble');
+    if (bubbles.length > 10) { // 保持最少10个气泡
+      const randomBubble = bubbles[Math.floor(Math.random() * bubbles.length)];
+      
+      // 使用更温和的渐出效果
+      randomBubble.style.transition = 'opacity 3s ease-out, transform 3s ease-out';
+      randomBubble.style.opacity = '0';
+      randomBubble.style.transform = 'scale(0.2)';
+      
+      setTimeout(() => {
+        if (randomBubble.parentNode) {
+          randomBubble.remove();
+        }
+      }, 3000);
+    }
   }
 
   startRain(duration) {
@@ -689,10 +680,10 @@ class WeatherEffectManager {
     // 初始创建星星
     this.createInitialStars();
     
-    // 定期添加和移除星星
+    // 定期添加和移除星星（使用更慢的更新频率）
     const starUpdateInterval = setInterval(() => {
       this.updateStarfield();
-    }, 2000); // 每2秒更新一次星空
+    }, 5000); // 每5秒更新一次星空，更温和的变化
     
     this.intervals.set('starfield', starUpdateInterval);
   }
@@ -704,7 +695,7 @@ class WeatherEffectManager {
     for (let i = 0; i < initialStarCount; i++) {
       setTimeout(() => {
         this.createStar();
-      }, i * 50); // 分批创建，避免一次性生成太多
+      }, i * 150); // 分批创建，每150ms创建一个，更平滑
     }
   }
 
@@ -723,9 +714,13 @@ class WeatherEffectManager {
     const sizeClass = this.getRandomStarSize();
     star.classList.add(sizeClass);
     
+    // 初始状态为不可见
+    star.style.opacity = '0';
+    star.style.transform = 'scale(0.2)';
+    
     // 随机动画时长和延迟
-    const animationDuration = Math.random() * 4 + 3; // 3-7秒
-    const animationDelay = Math.random() * 2; // 0-2秒延迟
+    const animationDuration = Math.random() * 5 + 4; // 4-9秒，更慢的动画
+    const animationDelay = Math.random() * 3; // 0-3秒延迟
     
     // 随机选择动画类型
     const animations = ['starTwinkle', 'starTwinkleSlow', 'starTwinkleFast'];
@@ -738,6 +733,13 @@ class WeatherEffectManager {
     
     this.starfield.appendChild(star);
     this.stars.push(star);
+    
+    // 渐入效果
+    setTimeout(() => {
+      star.style.transition = 'opacity 2.5s ease-in-out, transform 2.5s ease-in-out';
+      star.style.opacity = '';  // 恢复CSS中定义的默认透明度
+      star.style.transform = 'scale(1)';
+    }, 150);
     
     return star;
   }
@@ -764,13 +766,13 @@ class WeatherEffectManager {
   updateStarfield() {
     if (!this.isActive) return;
     
-    // 随机移除一些星星
-    if (this.stars.length > 0 && Math.random() < 0.3) {
+    // 随机移除一些星星（降低移除概率）
+    if (this.stars.length > 0 && Math.random() < 0.15) {
       this.removeStar();
     }
     
-    // 随机添加新星星
-    if (this.stars.length < this.maxStars && Math.random() < 0.6) {
+    // 随机添加新星星（降低创建概率）
+    if (this.stars.length < this.maxStars && Math.random() < 0.35) {
       this.createStar();
     }
     
@@ -792,9 +794,10 @@ class WeatherEffectManager {
     const randomIndex = Math.floor(Math.random() * this.stars.length);
     const star = this.stars[randomIndex];
     
-    // 淡出效果
-    star.style.transition = 'opacity 1s ease-out';
+    // 使用更温和的渐出效果
+    star.style.transition = 'opacity 3.5s ease-out, transform 3.5s ease-out';
     star.style.opacity = '0';
+    star.style.transform = 'scale(0.1)';
     
     setTimeout(() => {
       if (star.parentNode) {
@@ -805,7 +808,7 @@ class WeatherEffectManager {
       if (index > -1) {
         this.stars.splice(index, 1);
       }
-    }, 1000);
+    }, 3500);
   }
 
   stopEffect(effectType) {
@@ -825,14 +828,8 @@ class WeatherEffectManager {
     
     // 隐藏对应的容器
     switch (effectType) {
-      case 'petals':
-        this.petalsContainer.classList.remove('active');
-        break;
-      case 'rain':
-        this.rainContainer.classList.remove('active');
-        break;
-      case 'snow':
-        this.snowContainer.classList.remove('active');
+      case 'bubbles':
+        this.bubblesContainer.classList.remove('active');
         break;
     }
   }
@@ -859,6 +856,17 @@ class WeatherEffectManager {
   clearAllEffects() {
     for (const effect of this.currentEffects) {
       this.stopEffect(effect);
+    }
+    
+    // 清理气泡容器
+    if (this.bubblesContainer) {
+      this.bubblesContainer.classList.remove('active');
+      this.bubblesContainer.innerHTML = '';
+    }
+    
+    // 清理星光容器
+    if (this.starfield) {
+      this.stopStarfield();
     }
   }
 
@@ -900,9 +908,7 @@ class WeatherEffectManager {
     this.stop();
     
     // 移除所有效果容器
-    if (this.petalsContainer) this.petalsContainer.remove();
-    if (this.rainContainer) this.rainContainer.remove();
-    if (this.snowContainer) this.snowContainer.remove();
+    if (this.bubblesContainer) this.bubblesContainer.remove();
     if (this.starfield) this.starfield.remove();
   }
 }
@@ -923,21 +929,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const manager = dynamicBackgroundManager.weatherManager;
     
     // 测试白天效果
-    console.log('🌸 测试花瓣效果');
-    manager.startEffect('petals');
+    console.log('🫧 测试气泡效果');
+    manager.startBubbles();
     
     setTimeout(() => {
       console.log('✨ 测试星光效果');
       manager.startStarfield();
     }, 5000);
     
-    console.log('白天花瓣和夜晚星光效果将在5秒内展示');
+    console.log('白天气泡和夜晚星光效果将在5秒内展示');
   };
 
   // 单独测试星光的方法
   window.testStarfield = () => {
     console.log('✨ 测试星光效果');
     dynamicBackgroundManager.weatherManager.startStarfield();
+  };
+  
+  // 测试气泡效果
+  window.testBubbles = () => {
+    console.log('🫧 测试气泡效果');
+    dynamicBackgroundManager.weatherManager.startBubbles();
+    console.log('✨ 气泡特性: 类似星星的显示效果 + 多种尺寸 + 闪烁动画');
+    console.log('🎯 动画系统: 漂浮 + 闪烁 + 缓慢闪烁 + 快速闪烁');
+    console.log('🔄 生成策略: 40-70个初始气泡 + 智能管理系统');
+    console.log('🌈 颜色变化: 60%橙色气泡 + 40%粉红色气泡 + 15%发光效果');
+    console.log('⚡ 性能优化: 白天模式常驻显示，夜晚模式自动隐藏');
+    console.log('🌟 每个气泡都有独特的闪烁模式和透明度!');
+    console.log('💫 温和过渡: 2秒渐入 + 3秒渐出 + 更慢的更新频率');
   };
   
   // 测试所有优化效果
@@ -953,8 +972,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('mobile-enhanced');
   }
   
-  console.log('动态背景系统已初始化');
+  console.log('🌟 动态背景系统已初始化');
+  console.log('📱 手机端布局优化: 已修复header遮挡问题');
+  console.log('🫧 白天气泡效果: 类似星星的显示方式 + 多种尺寸 + 闪烁动画 + 智能管理');
+  console.log('✨ 夜晚星光效果: 常驻星光系统 + 多种尺寸 + 闪烁动画 + 智能管理');
+  console.log('🎯 显示逻辑: 白天模式显示气泡，夜晚模式显示星星');
+  console.log('🌈 动画系统: 漂浮 + 闪烁 + 缓慢闪烁 + 快速闪烁');
+  console.log('⚡ 性能优化: 常驻显示，主题切换自动管理');
   console.log('💡 调试提示: 在控制台运行 testWeatherEffects() 可以立即测试所有效果');
+  console.log('💡 调试提示: 在控制台运行 testBubbles() 可以测试白天气泡效果');
   console.log('💡 调试提示: 在控制台运行 testAllOptimizations() 可以测试所有优化效果');
 });
 

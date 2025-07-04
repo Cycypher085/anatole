@@ -175,98 +175,7 @@
 
 /* ================ 特殊效果元素 ================ */
 
-/* 花瓣容器 */
-.weather-petals {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: -999;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
 
-.weather-petals.active {
-  opacity: 1;
-}
-
-.petal {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: radial-gradient(ellipse, rgba(255,105,180,0.9) 0%, rgba(255,182,193,0.8) 50%, rgba(255,160,122,0.6) 100%);
-  border-radius: 50% 0 50% 0;
-  animation: petalFall linear infinite;
-  box-shadow: 0 0 4px rgba(255,105,180,0.5);
-}
-
-.petal:nth-child(odd) {
-  background: radial-gradient(ellipse, rgba(255,192,203,0.9) 0%, rgba(255,160,122,0.7) 50%, rgba(255,105,180,0.5) 100%);
-  transform: rotate(45deg);
-  width: 10px;
-  height: 10px;
-}
-
-/* 雨滴容器 */
-.weather-rain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: -999;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
-
-.weather-rain.active {
-  opacity: 1;
-}
-
-.raindrop {
-  position: absolute;
-  width: 3px;
-  height: 20px;
-  background: linear-gradient(to bottom, rgba(70,130,180,0.9) 0%, rgba(135,206,235,0.8) 30%, rgba(100,149,237,0.9) 100%);
-  border-radius: 2px 2px 50% 50%;
-  animation: rainFall linear infinite;
-  box-shadow: 0 0 2px rgba(70,130,180,0.6);
-}
-
-/* 雪花容器 */
-.weather-snow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: -999;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
-
-.weather-snow.active {
-  opacity: 1;
-}
-
-.snowflake {
-  position: absolute;
-  color: rgba(255,255,255,0.9);
-  font-size: 16px;
-  animation: snowFall linear infinite;
-  user-select: none;
-  text-shadow: 0 0 3px rgba(255,255,255,0.8);
-}
-
-.snowflake:nth-child(even) {
-  font-size: 12px;
-  color: rgba(255,255,255,0.8);
-  text-shadow: 0 0 2px rgba(255,255,255,0.6);
-}
 
 /* 月亮和流星效果已移除，夜晚模式现在只有常驻星光 */
 
@@ -408,69 +317,207 @@
   }
 }
 
-/* 新的漂浮花瓣动画 */
-@keyframes floatingPetal {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0.6;
-  }
-  10% {
-    opacity: 1;
+/* 白天气泡效果 */
+.bubblefield {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+  overflow: hidden !important;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.bubblefield.active {
+  opacity: 1;
+}
+
+.bubble {
+  position: absolute !important;
+  border-radius: 50% !important;
+  pointer-events: none !important;
+  will-change: transform, opacity;
+  z-index: 1 !important;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(200, 220, 255, 0.3), rgba(150, 200, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.3),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.bubble.size-1 { width: 6px; height: 6px; }
+.bubble.size-2 { width: 10px; height: 10px; }
+.bubble.size-3 { width: 14px; height: 14px; }
+.bubble.size-4 { width: 18px; height: 18px; }
+.bubble.size-5 { width: 22px; height: 22px; }
+
+.bubble.bubble-orange {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 165, 0, 0.8), rgba(255, 200, 100, 0.4), rgba(255, 215, 150, 0.2));
+  border: 1px solid rgba(255, 180, 80, 0.5);
+}
+
+.bubble.bubble-pink {
+  background: radial-gradient(circle at 30% 30%, rgba(255, 182, 193, 0.8), rgba(255, 200, 220, 0.4), rgba(255, 230, 240, 0.2));
+  border: 1px solid rgba(255, 160, 180, 0.5);
+}
+
+.bubble.glow-bubble {
+  box-shadow: 
+    0 0 15px rgba(255, 200, 150, 0.6),
+    inset 0 0 15px rgba(255, 180, 120, 0.3);
+}
+
+.bubble.glow-bubble.size-1 {
+  box-shadow: 
+    0 0 8px rgba(255, 200, 150, 0.5),
+    inset 0 0 8px rgba(255, 180, 120, 0.2);
+}
+
+.bubble.glow-bubble.size-2 {
+  box-shadow: 
+    0 0 12px rgba(255, 200, 150, 0.6),
+    inset 0 0 12px rgba(255, 180, 120, 0.25);
+}
+
+.bubble.glow-bubble.size-3 {
+  box-shadow: 
+    0 0 16px rgba(255, 200, 150, 0.7),
+    inset 0 0 16px rgba(255, 180, 120, 0.3);
+}
+
+.bubble.glow-bubble.size-4 {
+  box-shadow: 
+    0 0 20px rgba(255, 200, 150, 0.8),
+    inset 0 0 20px rgba(255, 180, 120, 0.35);
+}
+
+.bubble.glow-bubble.size-5 {
+  box-shadow: 
+    0 0 25px rgba(255, 200, 150, 0.9),
+    inset 0 0 25px rgba(255, 180, 120, 0.4);
+}
+
+/* 气泡漂浮动画 */
+@keyframes bubbleFloat {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
   }
   25% {
-    transform: translate(calc(var(--move-x) * 0.3), calc(var(--move-y) * 0.2)) rotate(calc(var(--rotate-angle) * 0.25));
+    transform: translateY(-8px) translateX(4px);
   }
   50% {
-    transform: translate(calc(var(--move-x) * 0.7), calc(var(--move-y) * 0.6)) rotate(calc(var(--rotate-angle) * 0.5));
+    transform: translateY(-4px) translateX(-6px);
   }
   75% {
-    transform: translate(calc(var(--move-x) * 0.9), calc(var(--move-y) * 0.8)) rotate(calc(var(--rotate-angle) * 0.75));
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--move-x), var(--move-y)) rotate(var(--rotate-angle));
-    opacity: 0.6;
+    transform: translateY(-12px) translateX(2px);
   }
 }
 
-/* 花瓣渐显动画 */
-@keyframes petalFadeIn {
+/* 气泡闪烁动画 */
+@keyframes bubbleTwinkle {
   0% {
-    opacity: 0;
-    filter: blur(4px);
-    transform: scale(0.8);
+    opacity: 0.3;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.7;
-    filter: blur(2px);
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+/* 气泡闪烁慢速动画 */
+@keyframes bubbleTwinkleSlow {
+  0% {
+    opacity: 0.2;
     transform: scale(0.9);
   }
   100% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* 气泡闪烁快速动画 */
+@keyframes bubbleTwinkleFast {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  100% {
     opacity: 1;
-    filter: blur(0px);
+    transform: scale(1.2);
+  }
+}
+
+/* 气泡渐入动画 */
+@keyframes bubbleFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
     transform: scale(1);
   }
 }
 
-/* 花瓣淡出动画 */
-@keyframes petalFadeOut {
+/* 气泡渐出动画 */
+@keyframes bubbleFadeOut {
   0% {
     opacity: 1;
     transform: scale(1);
   }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.2);
+  }
   100% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.2);
   }
 }
 
-/* 漂浮花瓣样式 */
-.floating-petal {
-  position: absolute !important;
-  animation-timing-function: ease-in-out !important;
-  will-change: transform, opacity;
+/* 星星渐入动画 */
+@keyframes starFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 星星渐出动画 */
+@keyframes starFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
 }
 
 /* 保留空白 - 月亮和流星动画已移除 */
@@ -692,6 +739,9 @@
   :root.dynamic-bg-enabled .theme--dark .wrapper__main {
     backdrop-filter: blur(4px) !important;
     -webkit-backdrop-filter: blur(4px) !important;
+    /* 增加顶部间距避免header遮挡内容 */
+    margin-top: 20px !important;
+    padding-top: 20px !important;
   }
   
   :root.dynamic-bg-enabled .theme--light .header,
@@ -722,6 +772,26 @@
     -webkit-backdrop-filter: none !important;
     margin-top: 0 !important;
     padding-top: 8px !important;
+  }
+  
+  /* 移动端Portfolio页面特殊优化 */
+  .portfolio {
+    padding-top: 80px !important; /* 增加足够的顶部间距 */
+  }
+  
+  .portfolio__title {
+    margin-top: 20px !important;
+    padding-top: 10px !important;
+  }
+  
+  /* Portfolio项目描述区域间距优化 */
+  .portfolio__description {
+    margin-top: 10px !important;
+  }
+  
+  .portfolio__description--left,
+  .portfolio__description--right {
+    margin-top: -10px !important; /* 减少负边距避免重叠 */
   }
 }
 
